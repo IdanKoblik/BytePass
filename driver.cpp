@@ -24,16 +24,14 @@ int runDriver(void) {
    serverAddr.sin_addr.s_addr = INADDR_ANY; 
 
    const char *hello = "hey";
-   for (int i = 0; i < 1000; i++) {
-      sendto(
-          sockfd,
-          hello, 
-          strlen(hello), 
-          MSG_CONFIRM, 
-          (const struct sockaddr *) &serverAddr, 
-          sizeof(serverAddr)
-      );
-   }
+   sendto(
+       sockfd,
+       hello, 
+       strlen(hello), 
+       MSG_CONFIRM, 
+       (const struct sockaddr *) &serverAddr, 
+       sizeof(serverAddr)
+   );
 
    close(sockfd);
    return 0;
