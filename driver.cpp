@@ -25,12 +25,12 @@ int runDriver(void) {
 
    const char *hello = "hey";
    sendto(
-       sockfd,
-       hello, 
-       strlen(hello), 
-       MSG_CONFIRM, 
-       (const struct sockaddr *) &serverAddr, 
-       sizeof(serverAddr)
+      sockfd,
+      hello, 
+      strlen(hello), 
+      MSG_CONFIRM, 
+      (const struct sockaddr *) &serverAddr, 
+      sizeof(serverAddr)
    );
 
    close(sockfd);

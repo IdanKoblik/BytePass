@@ -33,20 +33,32 @@ int runServer(void) {
       return -1;
    }
 
-   char buffer[BUFFER]; 
-   socklen_t len = sizeof(clientAddr);
-   int n = recvfrom(
-         sockfd,
-         (char *)buffer, 
-         BUFFER, 
-         MSG_WAITALL, 
-         (struct sockaddr *)&clientAddr, 
-         &len
-   );
+   while (true) {
+      char buffer[BUFFER]; 
+      socklen_t len = sizeof(clientAddr);
+      int n = recvfrom(
+          sockfd,
+          (char *)buffer - 1, 
+          BUFFER, 
+          MSG_WAITALL, 
+          (struct sockaddr *)&clientAddr, 
+          &len
+      );
 
-   buffer[n] = '\0';
-   std::cout << "Received new message from client:" << std::endl;
-   std::cout << buffer << std::endl; 
-   
+      if (n < 0) {
+         perror("recvfrom failed");
+         continue;
+      }
+
+      buffer[n] = '\0';
+
+      printf("Received message from %s:%d\n",
+        inet_ntoa(clientAddr.sin_addr),
+        ntohs(clientAddr.sin_port)
+      );
+
+      std::cout << buffer << std::endl; 
+   }
+
    return 0;
 }
