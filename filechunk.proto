@@ -1,0 +1,7 @@
+syntax = "proto3";
+
+message FileChunk {
+  string filename = 1;
+  bytes data = 2;
+  string checksum = 3;
+}
