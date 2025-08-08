@@ -52,15 +52,18 @@ struct TableStruct_filechunk_2eproto {
 extern "C" {
 extern const ::google::protobuf::internal::DescriptorTable descriptor_table_filechunk_2eproto;
 }  // extern "C"
+namespace protocol {
 class FileChunk;
 struct FileChunkDefaultTypeInternal;
 extern FileChunkDefaultTypeInternal _FileChunk_default_instance_;
 extern const ::google::protobuf::internal::ClassDataFull FileChunk_class_data_;
+}  // namespace protocol
 namespace google {
 namespace protobuf {
 }  // namespace protobuf
 }  // namespace google
 
+namespace protocol {
 
 // ===================================================================
 
@@ -68,7 +71,7 @@ namespace protobuf {
 // -------------------------------------------------------------------
 
 class FileChunk final : public ::google::protobuf::Message
-/* @@protoc_insertion_point(class_definition:FileChunk) */ {
+/* @@protoc_insertion_point(class_definition:protocol.FileChunk) */ {
  public:
   inline FileChunk() : FileChunk(nullptr) {}
   ~FileChunk() PROTOBUF_FINAL;
@@ -154,8 +157,13 @@ class FileChunk final : public ::google::protobuf::Message
 
   public:
   bool IsInitialized() const {
-    return true;
+    return IsInitializedImpl(*this);
   }
+
+  private:
+  static bool IsInitializedImpl(const MessageLite& msg);
+
+  public:
   ABSL_ATTRIBUTE_REINITIALIZES void Clear() PROTOBUF_FINAL;
   #if defined(PROTOBUF_CUSTOM_VTABLE)
   private:
@@ -186,7 +194,7 @@ class FileChunk final : public ::google::protobuf::Message
  private:
   template <typename T>
   friend ::absl::string_view(::google::protobuf::internal::GetAnyMessageName)();
-  static ::absl::string_view FullMessageName() { return "FileChunk"; }
+  static ::absl::string_view FullMessageName() { return "protocol.FileChunk"; }
 
  protected:
   explicit FileChunk(::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
@@ -212,9 +220,10 @@ class FileChunk final : public ::google::protobuf::Message
   enum : int {
     kFilenameFieldNumber = 1,
     kDataFieldNumber = 2,
-    kChecksumFieldNumber = 3,
+    kIndexFieldNumber = 3,
   };
-  // string filename = 1;
+  // required string filename = 1;
+  bool has_filename() const;
   void clear_filename() ;
   const ::std::string& filename() const;
   template <typename Arg_ = const ::std::string&, typename... Args_>
@@ -229,7 +238,8 @@ class FileChunk final : public ::google::protobuf::Message
   ::std::string* PROTOBUF_NONNULL _internal_mutable_filename();
 
   public:
-  // bytes data = 2;
+  // required bytes data = 2;
+  bool has_data() const;
   void clear_data() ;
   const ::std::string& data() const;
   template <typename Arg_ = const ::std::string&, typename... Args_>
@@ -244,27 +254,23 @@ class FileChunk final : public ::google::protobuf::Message
   ::std::string* PROTOBUF_NONNULL _internal_mutable_data();
 
   public:
-  // string checksum = 3;
-  void clear_checksum() ;
-  const ::std::string& checksum() const;
-  template <typename Arg_ = const ::std::string&, typename... Args_>
-  void set_checksum(Arg_&& arg, Args_... args);
-  ::std::string* PROTOBUF_NONNULL mutable_checksum();
-  [[nodiscard]] ::std::string* PROTOBUF_NULLABLE release_checksum();
-  void set_allocated_checksum(::std::string* PROTOBUF_NULLABLE value);
+  // required int32 index = 3;
+  bool has_index() const;
+  void clear_index() ;
+  ::int32_t index() const;
+  void set_index(::int32_t value);
 
   private:
-  const ::std::string& _internal_checksum() const;
-  PROTOBUF_ALWAYS_INLINE void _internal_set_checksum(const ::std::string& value);
-  ::std::string* PROTOBUF_NONNULL _internal_mutable_checksum();
+  ::int32_t _internal_index() const;
+  void _internal_set_index(::int32_t value);
 
   public:
-  // @@protoc_insertion_point(class_scope:FileChunk)
+  // @@protoc_insertion_point(class_scope:protocol.FileChunk)
  private:
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<2, 3,
-                                   0, 34,
+                                   0, 35,
                                    2>
       _table_;
 
@@ -287,7 +293,7 @@ class FileChunk final : public ::google::protobuf::Message
     ::google::protobuf::internal::CachedSize _cached_size_;
     ::google::protobuf::internal::ArenaStringPtr filename_;
     ::google::protobuf::internal::ArenaStringPtr data_;
-    ::google::protobuf::internal::ArenaStringPtr checksum_;
+    ::int32_t index_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
   union { Impl_ _impl_; };
@@ -312,7 +318,11 @@ extern const ::google::protobuf::internal::ClassDataFull FileChunk_class_data_;
 
 // FileChunk
 
-// string filename = 1;
+// required string filename = 1;
+inline bool FileChunk::has_filename() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
 inline void FileChunk::clear_filename() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.filename_.ClearToEmpty();
@@ -320,7 +330,7 @@ inline void FileChunk::clear_filename() {
 }
 inline const ::std::string& FileChunk::filename() const
     ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  // @@protoc_insertion_point(field_get:FileChunk.filename)
+  // @@protoc_insertion_point(field_get:protocol.FileChunk.filename)
   return _internal_filename();
 }
 template <typename Arg_, typename... Args_>
@@ -328,12 +338,12 @@ PROTOBUF_ALWAYS_INLINE void FileChunk::set_filename(Arg_&& arg, Args_... args) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_._has_bits_[0] |= 0x00000001u;
   _impl_.filename_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
-  // @@protoc_insertion_point(field_set:FileChunk.filename)
+  // @@protoc_insertion_point(field_set:protocol.FileChunk.filename)
 }
 inline ::std::string* PROTOBUF_NONNULL FileChunk::mutable_filename()
     ABSL_ATTRIBUTE_LIFETIME_BOUND {
   ::std::string* _s = _internal_mutable_filename();
-  // @@protoc_insertion_point(field_mutable:FileChunk.filename)
+  // @@protoc_insertion_point(field_mutable:protocol.FileChunk.filename)
   return _s;
 }
 inline const ::std::string& FileChunk::_internal_filename() const {
@@ -352,7 +362,7 @@ inline ::std::string* PROTOBUF_NONNULL FileChunk::_internal_mutable_filename() {
 }
 inline ::std::string* PROTOBUF_NULLABLE FileChunk::release_filename() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  // @@protoc_insertion_point(field_release:FileChunk.filename)
+  // @@protoc_insertion_point(field_release:protocol.FileChunk.filename)
   if ((_impl_._has_bits_[0] & 0x00000001u) == 0) {
     return nullptr;
   }
@@ -374,10 +384,14 @@ inline void FileChunk::set_allocated_filename(::std::string* PROTOBUF_NULLABLE v
   if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.filename_.IsDefault()) {
     _impl_.filename_.Set("", GetArena());
   }
-  // @@protoc_insertion_point(field_set_allocated:FileChunk.filename)
+  // @@protoc_insertion_point(field_set_allocated:protocol.FileChunk.filename)
 }
 
-// bytes data = 2;
+// required bytes data = 2;
+inline bool FileChunk::has_data() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000002u) != 0;
+  return value;
+}
 inline void FileChunk::clear_data() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.data_.ClearToEmpty();
@@ -385,7 +399,7 @@ inline void FileChunk::clear_data() {
 }
 inline const ::std::string& FileChunk::data() const
     ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  // @@protoc_insertion_point(field_get:FileChunk.data)
+  // @@protoc_insertion_point(field_get:protocol.FileChunk.data)
   return _internal_data();
 }
 template <typename Arg_, typename... Args_>
@@ -393,12 +407,12 @@ PROTOBUF_ALWAYS_INLINE void FileChunk::set_data(Arg_&& arg, Args_... args) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_._has_bits_[0] |= 0x00000002u;
   _impl_.data_.SetBytes(static_cast<Arg_&&>(arg), args..., GetArena());
-  // @@protoc_insertion_point(field_set:FileChunk.data)
+  // @@protoc_insertion_point(field_set:protocol.FileChunk.data)
 }
 inline ::std::string* PROTOBUF_NONNULL FileChunk::mutable_data()
     ABSL_ATTRIBUTE_LIFETIME_BOUND {
   ::std::string* _s = _internal_mutable_data();
-  // @@protoc_insertion_point(field_mutable:FileChunk.data)
+  // @@protoc_insertion_point(field_mutable:protocol.FileChunk.data)
   return _s;
 }
 inline const ::std::string& FileChunk::_internal_data() const {
@@ -417,7 +431,7 @@ inline ::std::string* PROTOBUF_NONNULL FileChunk::_internal_mutable_data() {
 }
 inline ::std::string* PROTOBUF_NULLABLE FileChunk::release_data() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  // @@protoc_insertion_point(field_release:FileChunk.data)
+  // @@protoc_insertion_point(field_release:protocol.FileChunk.data)
   if ((_impl_._has_bits_[0] & 0x00000002u) == 0) {
     return nullptr;
   }
@@ -439,72 +453,35 @@ inline void FileChunk::set_allocated_data(::std::string* PROTOBUF_NULLABLE value
   if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.data_.IsDefault()) {
     _impl_.data_.Set("", GetArena());
   }
-  // @@protoc_insertion_point(field_set_allocated:FileChunk.data)
+  // @@protoc_insertion_point(field_set_allocated:protocol.FileChunk.data)
 }
 
-// string checksum = 3;
-inline void FileChunk::clear_checksum() {
+// required int32 index = 3;
+inline bool FileChunk::has_index() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000004u) != 0;
+  return value;
+}
+inline void FileChunk::clear_index() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.checksum_.ClearToEmpty();
+  _impl_.index_ = 0;
   _impl_._has_bits_[0] &= ~0x00000004u;
 }
-inline const ::std::string& FileChunk::checksum() const
-    ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  // @@protoc_insertion_point(field_get:FileChunk.checksum)
-  return _internal_checksum();
+inline ::int32_t FileChunk::index() const {
+  // @@protoc_insertion_point(field_get:protocol.FileChunk.index)
+  return _internal_index();
 }
-template <typename Arg_, typename... Args_>
-PROTOBUF_ALWAYS_INLINE void FileChunk::set_checksum(Arg_&& arg, Args_... args) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
+inline void FileChunk::set_index(::int32_t value) {
+  _internal_set_index(value);
   _impl_._has_bits_[0] |= 0x00000004u;
-  _impl_.checksum_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
-  // @@protoc_insertion_point(field_set:FileChunk.checksum)
+  // @@protoc_insertion_point(field_set:protocol.FileChunk.index)
 }
-inline ::std::string* PROTOBUF_NONNULL FileChunk::mutable_checksum()
-    ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  ::std::string* _s = _internal_mutable_checksum();
-  // @@protoc_insertion_point(field_mutable:FileChunk.checksum)
-  return _s;
-}
-inline const ::std::string& FileChunk::_internal_checksum() const {
+inline ::int32_t FileChunk::_internal_index() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.checksum_.Get();
+  return _impl_.index_;
 }
-inline void FileChunk::_internal_set_checksum(const ::std::string& value) {
+inline void FileChunk::_internal_set_index(::int32_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_._has_bits_[0] |= 0x00000004u;
-  _impl_.checksum_.Set(value, GetArena());
-}
-inline ::std::string* PROTOBUF_NONNULL FileChunk::_internal_mutable_checksum() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_._has_bits_[0] |= 0x00000004u;
-  return _impl_.checksum_.Mutable( GetArena());
-}
-inline ::std::string* PROTOBUF_NULLABLE FileChunk::release_checksum() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  // @@protoc_insertion_point(field_release:FileChunk.checksum)
-  if ((_impl_._has_bits_[0] & 0x00000004u) == 0) {
-    return nullptr;
-  }
-  _impl_._has_bits_[0] &= ~0x00000004u;
-  auto* released = _impl_.checksum_.Release();
-  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString()) {
-    _impl_.checksum_.Set("", GetArena());
-  }
-  return released;
-}
-inline void FileChunk::set_allocated_checksum(::std::string* PROTOBUF_NULLABLE value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  if (value != nullptr) {
-    _impl_._has_bits_[0] |= 0x00000004u;
-  } else {
-    _impl_._has_bits_[0] &= ~0x00000004u;
-  }
-  _impl_.checksum_.SetAllocated(value, GetArena());
-  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.checksum_.IsDefault()) {
-    _impl_.checksum_.Set("", GetArena());
-  }
-  // @@protoc_insertion_point(field_set_allocated:FileChunk.checksum)
+  _impl_.index_ = value;
 }
 
 #ifdef __GNUC__
@@ -512,6 +489,7 @@ inline void FileChunk::set_allocated_checksum(::std::string* PROTOBUF_NULLABLE v
 #endif  // __GNUC__
 
 // @@protoc_insertion_point(namespace_scope)
+}  // namespace protocol
 
 
 // @@protoc_insertion_point(global_scope)

@@ -7,10 +7,13 @@
 int main(int argc, char *argv[]) {
    std::cout << "Echo-ft" << std::endl;
 
-   if (argc > 1 && std::string(argv[1]) == "server")
+   if (argc < 2) 
+      return -1;
+
+   if (std::string(argv[1]) == "server")
       runServer();
-   else
-      runDriver();
+   else if (std::string(argv[2]) != "")
+      runDriver(argv[2]);
 
    return 0;
 }

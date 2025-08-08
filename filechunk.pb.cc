@@ -24,6 +24,7 @@ PROTOBUF_PRAGMA_INIT_SEG
 namespace _pb = ::google::protobuf;
 namespace _pbi = ::google::protobuf::internal;
 namespace _fl = ::google::protobuf::internal::field_layout;
+namespace protocol {
 
 inline constexpr FileChunk::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
@@ -34,9 +35,7 @@ inline constexpr FileChunk::Impl_::Impl_(
         data_(
             &::google::protobuf::internal::fixed_address_empty_string,
             ::_pbi::ConstantInitialized()),
-        checksum_(
-            &::google::protobuf::internal::fixed_address_empty_string,
-            ::_pbi::ConstantInitialized()) {}
+        index_{0} {}
 
 template <typename>
 PROTOBUF_CONSTEXPR FileChunk::FileChunk(::_pbi::ConstantInitialized)
@@ -57,6 +56,7 @@ struct FileChunkDefaultTypeInternal {
 
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 FileChunkDefaultTypeInternal _FileChunk_default_instance_;
+}  // namespace protocol
 static constexpr const ::_pb::EnumDescriptor *PROTOBUF_NONNULL *PROTOBUF_NULLABLE
     file_level_enum_descriptors_filechunk_2eproto = nullptr;
 static constexpr const ::_pb::ServiceDescriptor *PROTOBUF_NONNULL *PROTOBUF_NULLABLE
@@ -65,11 +65,11 @@ const ::uint32_t
     TableStruct_filechunk_2eproto::offsets[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
         protodesc_cold) = {
         0x081, // bitmap
-        PROTOBUF_FIELD_OFFSET(::FileChunk, _impl_._has_bits_),
+        PROTOBUF_FIELD_OFFSET(::protocol::FileChunk, _impl_._has_bits_),
         6, // hasbit index offset
-        PROTOBUF_FIELD_OFFSET(::FileChunk, _impl_.filename_),
-        PROTOBUF_FIELD_OFFSET(::FileChunk, _impl_.data_),
-        PROTOBUF_FIELD_OFFSET(::FileChunk, _impl_.checksum_),
+        PROTOBUF_FIELD_OFFSET(::protocol::FileChunk, _impl_.filename_),
+        PROTOBUF_FIELD_OFFSET(::protocol::FileChunk, _impl_.data_),
+        PROTOBUF_FIELD_OFFSET(::protocol::FileChunk, _impl_.index_),
         0,
         1,
         2,
@@ -77,22 +77,22 @@ const ::uint32_t
 
 static const ::_pbi::MigrationSchema
     schemas[] ABSL_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
-        {0, sizeof(::FileChunk)},
+        {0, sizeof(::protocol::FileChunk)},
 };
 static const ::_pb::Message* PROTOBUF_NONNULL const file_default_instances[] = {
-    &::_FileChunk_default_instance_._instance,
+    &::protocol::_FileChunk_default_instance_._instance,
 };
 const char descriptor_table_protodef_filechunk_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
-    "\n\017filechunk.proto\"=\n\tFileChunk\022\020\n\010filena"
-    "me\030\001 \001(\t\022\014\n\004data\030\002 \001(\014\022\020\n\010checksum\030\003 \001(\t"
-    "b\006proto3"
+    "\n\017filechunk.proto\022\010protocol\":\n\tFileChunk"
+    "\022\020\n\010filename\030\001 \002(\t\022\014\n\004data\030\002 \002(\014\022\r\n\005inde"
+    "x\030\003 \002(\005"
 };
 static ::absl::once_flag descriptor_table_filechunk_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_filechunk_2eproto = {
     false,
     false,
-    88,
+    87,
     descriptor_table_protodef_filechunk_2eproto,
     "filechunk.proto",
     &descriptor_table_filechunk_2eproto_once,
@@ -105,6 +105,7 @@ PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_filechunk_2epr
     file_level_enum_descriptors_filechunk_2eproto,
     file_level_service_descriptors_filechunk_2eproto,
 };
+namespace protocol {
 // ===================================================================
 
 class FileChunk::_Internal {
@@ -113,6 +114,9 @@ class FileChunk::_Internal {
       decltype(::std::declval<FileChunk>()._impl_._has_bits_);
   static constexpr ::int32_t kHasBitsOffset =
       8 * PROTOBUF_FIELD_OFFSET(FileChunk, _impl_._has_bits_);
+  static bool MissingRequiredFields(const HasBits& has_bits) {
+    return ((has_bits[0] & 0x00000007) ^ 0x00000007) != 0;
+  }
 };
 
 FileChunk::FileChunk(::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
@@ -122,17 +126,16 @@ FileChunk::FileChunk(::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
     : ::google::protobuf::Message(arena) {
 #endif  // PROTOBUF_CUSTOM_VTABLE
   SharedCtor(arena);
-  // @@protoc_insertion_point(arena_constructor:FileChunk)
+  // @@protoc_insertion_point(arena_constructor:protocol.FileChunk)
 }
 PROTOBUF_NDEBUG_INLINE FileChunk::Impl_::Impl_(
     ::google::protobuf::internal::InternalVisibility visibility,
     ::google::protobuf::Arena* PROTOBUF_NULLABLE arena, const Impl_& from,
-    const ::FileChunk& from_msg)
+    const ::protocol::FileChunk& from_msg)
       : _has_bits_{from._has_bits_},
         _cached_size_{0},
         filename_(arena, from.filename_),
-        data_(arena, from.data_),
-        checksum_(arena, from.checksum_) {}
+        data_(arena, from.data_) {}
 
 FileChunk::FileChunk(
     ::google::protobuf::Arena* PROTOBUF_NULLABLE arena,
@@ -147,22 +150,23 @@ FileChunk::FileChunk(
   _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
       from._internal_metadata_);
   new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
+  _impl_.index_ = from._impl_.index_;
 
-  // @@protoc_insertion_point(copy_constructor:FileChunk)
+  // @@protoc_insertion_point(copy_constructor:protocol.FileChunk)
 }
 PROTOBUF_NDEBUG_INLINE FileChunk::Impl_::Impl_(
     ::google::protobuf::internal::InternalVisibility visibility,
     ::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
       : _cached_size_{0},
         filename_(arena),
-        data_(arena),
-        checksum_(arena) {}
+        data_(arena) {}
 
 inline void FileChunk::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
   new (&_impl_) Impl_(internal_visibility(), arena);
+  _impl_.index_ = {};
 }
 FileChunk::~FileChunk() {
-  // @@protoc_insertion_point(destructor:FileChunk)
+  // @@protoc_insertion_point(destructor:protocol.FileChunk)
   SharedDtor(*this);
 }
 inline void FileChunk::SharedDtor(MessageLite& self) {
@@ -171,7 +175,6 @@ inline void FileChunk::SharedDtor(MessageLite& self) {
   ABSL_DCHECK(this_.GetArena() == nullptr);
   this_._impl_.filename_.Destroy();
   this_._impl_.data_.Destroy();
-  this_._impl_.checksum_.Destroy();
   this_._impl_.~Impl_();
 }
 
@@ -190,7 +193,7 @@ constexpr auto FileChunk::InternalGenerateClassData_() {
           &_FileChunk_default_instance_._instance,
           &_table_.header,
           nullptr,  // OnDemandRegisterArenaDtor
-          nullptr,  // IsInitialized
+          FileChunk::IsInitializedImpl,
           &FileChunk::MergeImpl,
           ::google::protobuf::Message::GetNewImpl<FileChunk>(),
 #if defined(PROTOBUF_CUSTOM_VTABLE)
@@ -218,7 +221,7 @@ FileChunk::GetClassData() const {
   return FileChunk_class_data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<2, 3, 0, 34, 2>
+const ::_pbi::TcParseTable<2, 3, 0, 35, 2>
 FileChunk::_table_ = {
   {
     PROTOBUF_FIELD_OFFSET(FileChunk, _impl_._has_bits_),
@@ -234,59 +237,56 @@ FileChunk::_table_ = {
     nullptr,  // post_loop_handler
     ::_pbi::TcParser::GenericFallback,  // fallback
     #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
-    ::_pbi::TcParser::GetTable<::FileChunk>(),  // to_prefetch
+    ::_pbi::TcParser::GetTable<::protocol::FileChunk>(),  // to_prefetch
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
     {::_pbi::TcParser::MiniParse, {}},
-    // string filename = 1;
-    {::_pbi::TcParser::FastUS1,
+    // required string filename = 1;
+    {::_pbi::TcParser::FastSS1,
      {10, 0, 0, PROTOBUF_FIELD_OFFSET(FileChunk, _impl_.filename_)}},
-    // bytes data = 2;
+    // required bytes data = 2;
     {::_pbi::TcParser::FastBS1,
      {18, 1, 0, PROTOBUF_FIELD_OFFSET(FileChunk, _impl_.data_)}},
-    // string checksum = 3;
-    {::_pbi::TcParser::FastUS1,
-     {26, 2, 0, PROTOBUF_FIELD_OFFSET(FileChunk, _impl_.checksum_)}},
+    // required int32 index = 3;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(FileChunk, _impl_.index_), 2>(),
+     {24, 2, 0, PROTOBUF_FIELD_OFFSET(FileChunk, _impl_.index_)}},
   }}, {{
     65535, 65535
   }}, {{
-    // string filename = 1;
+    // required string filename = 1;
     {PROTOBUF_FIELD_OFFSET(FileChunk, _impl_.filename_), _Internal::kHasBitsOffset + 0, 0,
-    (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // bytes data = 2;
+    (0 | ::_fl::kFcOptional | ::_fl::kRawString | ::_fl::kRepAString)},
+    // required bytes data = 2;
     {PROTOBUF_FIELD_OFFSET(FileChunk, _impl_.data_), _Internal::kHasBitsOffset + 1, 0,
     (0 | ::_fl::kFcOptional | ::_fl::kBytes | ::_fl::kRepAString)},
-    // string checksum = 3;
-    {PROTOBUF_FIELD_OFFSET(FileChunk, _impl_.checksum_), _Internal::kHasBitsOffset + 2, 0,
-    (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // required int32 index = 3;
+    {PROTOBUF_FIELD_OFFSET(FileChunk, _impl_.index_), _Internal::kHasBitsOffset + 2, 0,
+    (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
   }},
   // no aux_entries
   {{
-    "\11\10\0\10\0\0\0\0"
-    "FileChunk"
+    "\22\10\0\0\0\0\0\0"
+    "protocol.FileChunk"
     "filename"
-    "checksum"
   }},
 };
 PROTOBUF_NOINLINE void FileChunk::Clear() {
-// @@protoc_insertion_point(message_clear_start:FileChunk)
+// @@protoc_insertion_point(message_clear_start:protocol.FileChunk)
   ::google::protobuf::internal::TSanWrite(&_impl_);
   ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   cached_has_bits = _impl_._has_bits_[0];
-  if ((cached_has_bits & 0x00000007u) != 0) {
+  if ((cached_has_bits & 0x00000003u) != 0) {
     if ((cached_has_bits & 0x00000001u) != 0) {
       _impl_.filename_.ClearNonDefaultToEmpty();
     }
     if ((cached_has_bits & 0x00000002u) != 0) {
       _impl_.data_.ClearNonDefaultToEmpty();
     }
-    if ((cached_has_bits & 0x00000004u) != 0) {
-      _impl_.checksum_.ClearNonDefaultToEmpty();
-    }
   }
+  _impl_.index_ = 0;
   _impl_._has_bits_.Clear();
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
 }
@@ -302,36 +302,30 @@ PROTOBUF_NOINLINE void FileChunk::Clear() {
     ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) const {
   const FileChunk& this_ = *this;
 #endif  // PROTOBUF_CUSTOM_VTABLE
-  // @@protoc_insertion_point(serialize_to_array_start:FileChunk)
+  // @@protoc_insertion_point(serialize_to_array_start:protocol.FileChunk)
   ::uint32_t cached_has_bits = 0;
   (void)cached_has_bits;
 
-  // string filename = 1;
-  if ((this_._impl_._has_bits_[0] & 0x00000001u) != 0) {
-    if (!this_._internal_filename().empty()) {
-      const ::std::string& _s = this_._internal_filename();
-      ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
-          _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "FileChunk.filename");
-      target = stream->WriteStringMaybeAliased(1, _s, target);
-    }
+  cached_has_bits = this_._impl_._has_bits_[0];
+  // required string filename = 1;
+  if ((cached_has_bits & 0x00000001u) != 0) {
+    const ::std::string& _s = this_._internal_filename();
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(_s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormat::SERIALIZE,
+                                "protocol.FileChunk.filename");
+    target = stream->WriteStringMaybeAliased(1, _s, target);
   }
 
-  // bytes data = 2;
-  if ((this_._impl_._has_bits_[0] & 0x00000002u) != 0) {
-    if (!this_._internal_data().empty()) {
-      const ::std::string& _s = this_._internal_data();
-      target = stream->WriteBytesMaybeAliased(2, _s, target);
-    }
+  // required bytes data = 2;
+  if ((cached_has_bits & 0x00000002u) != 0) {
+    const ::std::string& _s = this_._internal_data();
+    target = stream->WriteBytesMaybeAliased(2, _s, target);
   }
 
-  // string checksum = 3;
-  if ((this_._impl_._has_bits_[0] & 0x00000004u) != 0) {
-    if (!this_._internal_checksum().empty()) {
-      const ::std::string& _s = this_._internal_checksum();
-      ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
-          _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "FileChunk.checksum");
-      target = stream->WriteStringMaybeAliased(3, _s, target);
-    }
+  // required int32 index = 3;
+  if ((cached_has_bits & 0x00000004u) != 0) {
+    target =
+        ::google::protobuf::internal::WireFormatLite::WriteInt32ToArrayWithField<3>(
+            stream, this_._internal_index(), target);
   }
 
   if (ABSL_PREDICT_FALSE(this_._internal_metadata_.have_unknown_fields())) {
@@ -339,7 +333,7 @@ PROTOBUF_NOINLINE void FileChunk::Clear() {
         ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
             this_._internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:FileChunk)
+  // @@protoc_insertion_point(serialize_to_array_end:protocol.FileChunk)
   return target;
 }
 
@@ -350,7 +344,7 @@ PROTOBUF_NOINLINE void FileChunk::Clear() {
 ::size_t FileChunk::ByteSizeLong() const {
   const FileChunk& this_ = *this;
 #endif  // PROTOBUF_CUSTOM_VTABLE
-  // @@protoc_insertion_point(message_byte_size_start:FileChunk)
+  // @@protoc_insertion_point(message_byte_size_start:protocol.FileChunk)
   ::size_t total_size = 0;
 
   ::uint32_t cached_has_bits = 0;
@@ -360,26 +354,20 @@ PROTOBUF_NOINLINE void FileChunk::Clear() {
   ::_pbi::Prefetch5LinesFrom7Lines(&this_);
   cached_has_bits = this_._impl_._has_bits_[0];
   if ((cached_has_bits & 0x00000007u) != 0) {
-    // string filename = 1;
+    // required string filename = 1;
     if ((cached_has_bits & 0x00000001u) != 0) {
-      if (!this_._internal_filename().empty()) {
-        total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
-                                        this_._internal_filename());
-      }
+      total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                      this_._internal_filename());
     }
-    // bytes data = 2;
+    // required bytes data = 2;
     if ((cached_has_bits & 0x00000002u) != 0) {
-      if (!this_._internal_data().empty()) {
-        total_size += 1 + ::google::protobuf::internal::WireFormatLite::BytesSize(
-                                        this_._internal_data());
-      }
+      total_size += 1 + ::google::protobuf::internal::WireFormatLite::BytesSize(
+                                      this_._internal_data());
     }
-    // string checksum = 3;
+    // required int32 index = 3;
     if ((cached_has_bits & 0x00000004u) != 0) {
-      if (!this_._internal_checksum().empty()) {
-        total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
-                                        this_._internal_checksum());
-      }
+      total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+          this_._internal_index());
     }
   }
   return this_.MaybeComputeUnknownFieldsSize(total_size,
@@ -389,7 +377,7 @@ PROTOBUF_NOINLINE void FileChunk::Clear() {
 void FileChunk::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google::protobuf::MessageLite& from_msg) {
   auto* const _this = static_cast<FileChunk*>(&to_msg);
   auto& from = static_cast<const FileChunk&>(from_msg);
-  // @@protoc_insertion_point(class_specific_merge_from_start:FileChunk)
+  // @@protoc_insertion_point(class_specific_merge_from_start:protocol.FileChunk)
   ABSL_DCHECK_NE(&from, _this);
   ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
@@ -397,31 +385,13 @@ void FileChunk::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::googl
   cached_has_bits = from._impl_._has_bits_[0];
   if ((cached_has_bits & 0x00000007u) != 0) {
     if ((cached_has_bits & 0x00000001u) != 0) {
-      if (!from._internal_filename().empty()) {
-        _this->_internal_set_filename(from._internal_filename());
-      } else {
-        if (_this->_impl_.filename_.IsDefault()) {
-          _this->_internal_set_filename("");
-        }
-      }
+      _this->_internal_set_filename(from._internal_filename());
     }
     if ((cached_has_bits & 0x00000002u) != 0) {
-      if (!from._internal_data().empty()) {
-        _this->_internal_set_data(from._internal_data());
-      } else {
-        if (_this->_impl_.data_.IsDefault()) {
-          _this->_internal_set_data("");
-        }
-      }
+      _this->_internal_set_data(from._internal_data());
     }
     if ((cached_has_bits & 0x00000004u) != 0) {
-      if (!from._internal_checksum().empty()) {
-        _this->_internal_set_checksum(from._internal_checksum());
-      } else {
-        if (_this->_impl_.checksum_.IsDefault()) {
-          _this->_internal_set_checksum("");
-        }
-      }
+      _this->_impl_.index_ = from._impl_.index_;
     }
   }
   _this->_impl_._has_bits_[0] |= cached_has_bits;
@@ -429,12 +399,20 @@ void FileChunk::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::googl
 }
 
 void FileChunk::CopyFrom(const FileChunk& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:FileChunk)
+// @@protoc_insertion_point(class_specific_copy_from_start:protocol.FileChunk)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
+PROTOBUF_NOINLINE bool FileChunk::IsInitializedImpl(
+    const MessageLite& msg) {
+  auto& this_ = static_cast<const FileChunk&>(msg);
+  if (_Internal::MissingRequiredFields(this_._impl_._has_bits_)) {
+    return false;
+  }
+  return true;
+}
 
 void FileChunk::InternalSwap(FileChunk* PROTOBUF_RESTRICT PROTOBUF_NONNULL other) {
   using ::std::swap;
@@ -444,13 +422,14 @@ void FileChunk::InternalSwap(FileChunk* PROTOBUF_RESTRICT PROTOBUF_NONNULL other
   swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.filename_, &other->_impl_.filename_, arena);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.data_, &other->_impl_.data_, arena);
-  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.checksum_, &other->_impl_.checksum_, arena);
+  swap(_impl_.index_, other->_impl_.index_);
 }
 
 ::google::protobuf::Metadata FileChunk::GetMetadata() const {
   return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
 }
 // @@protoc_insertion_point(namespace_scope)
+}  // namespace protocol
 namespace google {
 namespace protobuf {
 }  // namespace protobuf

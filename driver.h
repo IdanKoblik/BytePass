@@ -3,6 +3,6 @@
 
 #define PORT 8080
 
-int runDriver(void);
+int runDriver(const char *filename);
 
 #endif

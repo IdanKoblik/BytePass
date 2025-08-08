@@ -1,4 +1,6 @@
+#include <absl/strings/internal/str_format/extension.h>
 #include <bits/stdc++.h> 
+#include <google/protobuf/message_lite.h>
 #include <stdlib.h> 
 #include <unistd.h> 
 #include <string.h> 
@@ -7,10 +9,13 @@
 #include <arpa/inet.h> 
 #include <netinet/in.h> 
 #include "server.h"
+#include "filechunk.pb.h"
 
-#define BUFFER 1024
+#define BUFFER 4096
 
 int runServer(void) {
+   GOOGLE_PROTOBUF_VERIFY_VERSION;
+
    int sockfd;
    struct sockaddr_in serverAddr, clientAddr;
 
@@ -38,7 +43,7 @@ int runServer(void) {
       socklen_t len = sizeof(clientAddr);
       int n = recvfrom(
           sockfd,
-          (char *)buffer - 1, 
+          buffer, 
           BUFFER, 
           MSG_WAITALL, 
           (struct sockaddr *)&clientAddr, 
@@ -50,15 +55,22 @@ int runServer(void) {
          continue;
       }
 
-      buffer[n] = '\0';
+      protocol::FileChunk chunk;
+      if (!chunk.ParseFromArray(buffer, n)) {
+         std::cerr << "Failed to parse protobuf message" << std::endl;
+         continue;
+      }
 
-      printf("Received message from %s:%d\n",
-        inet_ntoa(clientAddr.sin_addr),
-        ntohs(clientAddr.sin_port)
-      );
+      std::string clientIP = inet_ntoa(clientAddr.sin_addr);
+      int clientPort = ntohs(clientAddr.sin_port);
 
-      std::cout << buffer << std::endl; 
+      std::cout << "Received chunk from " << clientIP << ":" << clientPort << std::endl;
+      std::cout << "CHUNK: " << chunk.index() << std::endl;
+      std::cout << "Filename: " << chunk.filename() << std::endl;
+      std::cout << "Data size: " << chunk.data().size() << " bytes" << std::endl;
    }
 
+   google::protobuf::ShutdownProtobufLibrary();
+   close(sockfd);
    return 0;
 }

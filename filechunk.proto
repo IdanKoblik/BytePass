@@ -1,7 +1,9 @@
-syntax = "proto3";
+syntax = "proto2";
+
+package protocol;
 
 message FileChunk {
-  string filename = 1;
-  bytes data = 2;
-  string checksum = 3;
+  required string filename = 1;
+  required bytes data = 2;
+  required int32 index = 3;
 }

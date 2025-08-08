@@ -1,4 +1,6 @@
 #include <bits/stdc++.h> 
+#include <cstdint>
+#include <fstream>
 #include <stdlib.h> 
 #include <unistd.h> 
 #include <string.h> 
@@ -7,8 +9,20 @@
 #include <arpa/inet.h> 
 #include <netinet/in.h> 
 #include "driver.h"
+#include "filechunk.pb.h"
 
-int runDriver(void) {
+#define BUFFER_SIZE 1024
+
+int runDriver(const char *filename) {
+   GOOGLE_PROTOBUF_VERIFY_VERSION;
+
+   std::ifstream file(filename, std::ios::binary | std::ios::ate);
+   if (!file) {
+      perror("socket creation failed"); 
+      exit(EXIT_FAILURE); 
+      return -1;
+   }
+
    int sockfd;
    struct sockaddr_in serverAddr;
 
@@ -23,16 +37,40 @@ int runDriver(void) {
    serverAddr.sin_port = htons(PORT); 
    serverAddr.sin_addr.s_addr = INADDR_ANY; 
 
-   const char *hello = "hey";
-   sendto(
-      sockfd,
-      hello, 
-      strlen(hello), 
-      MSG_CONFIRM, 
-      (const struct sockaddr *) &serverAddr, 
-      sizeof(serverAddr)
-   );
+   std::streamsize fileSize = file.tellg();
+   file.seekg(0, std::ios::beg);
 
+   std::size_t chunksCount = (fileSize + BUFFER_SIZE - 1) / BUFFER_SIZE;
+   for (std::size_t i = 0; i < chunksCount; i++) {
+      std::array<uint8_t, BUFFER_SIZE> buffer{};
+      std::streamsize toRead = std::min<std::streamsize>(BUFFER_SIZE, fileSize - i * BUFFER_SIZE);
+      file.read(reinterpret_cast<char *>(buffer.data()), toRead);
+
+      std::cout << "Chunk " << i << ": read " << toRead << " bytes" << std::endl;
+
+      protocol::FileChunk chunk;
+      chunk.set_filename(filename);
+      chunk.set_data(buffer.data(), toRead);
+      chunk.set_index(i);
+
+      std::string serializedChunk;
+      if (!chunk.SerializeToString(&serializedChunk)) {
+         std::cerr << "Failed to serialize chunk " << i << std::endl;
+         continue;
+      }
+
+      sendto(
+         sockfd,
+         serializedChunk.data(), 
+         serializedChunk.size(), 
+         MSG_CONFIRM, 
+         (const struct sockaddr *)&serverAddr, 
+         sizeof(serverAddr)
+      );
+   }
+
+   file.close();
    close(sockfd);
+   google::protobuf::ShutdownProtobufLibrary();
    return 0;
 }
