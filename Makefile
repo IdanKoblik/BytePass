@@ -6,7 +6,7 @@ PROTOC_FLAGS = -I=.
 PROTO_FILES = filechunk.proto
 PROTO_SRCS = filechunk.pb.cc
 PROTO_HDRS = filechunk.pb.h
-SRCS = driver.cpp main.cpp server.cpp $(PROTO_SRCS)
+SRCS = $(wildcard *.cpp) $(PROTO_SRCS)
 OBJS = $(SRCS:.cpp=.o)
 TARGET = echo-ft
 
