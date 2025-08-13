@@ -1,6 +1,7 @@
 test/test_runner-filechunk.pb.gcda
 test/test_runner-filechunk.pb.gcno
 test/test_runner
+echo-ft
 
 build/
 obj/
