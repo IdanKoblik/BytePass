@@ -15,7 +15,7 @@ int main(int argc, char *argv[]) {
       return -1;
 
    if (argc == 1) {
-      int choice;
+      unsigned int choice;
       std::cout << "=== Select option ===" << std::endl;
       std::cout << "1. Sender" << std::endl;
       std::cout << "2. Receiver" << std::endl;
