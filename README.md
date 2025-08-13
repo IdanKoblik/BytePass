@@ -1,7 +1,6 @@
 # BytePass
 Lightweight P2P File Transfer
 
----
 > ⚠️ **Development Status**: This project is currently in development, and usage is at your own risk as features, stability, and security may change without notice.
 
 [![Platforms](https://img.shields.io/badge/Platforms-Linux-blue)]()
@@ -22,6 +21,7 @@ git clone https://github.com/IdanKoblik/bytepass.git
 cd bytepass
 
 make
+
 ./echo-ft
 ```
 
