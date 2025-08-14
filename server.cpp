@@ -1,5 +1,6 @@
 #include <absl/strings/internal/str_format/extension.h>
 #include <bits/stdc++.h> 
+#include <cstdlib>
 #include <google/protobuf/message_lite.h>
 #include <stdlib.h> 
 #include <unistd.h> 
@@ -10,11 +11,17 @@
 #include <netinet/in.h> 
 #include "server.h"
 #include "filechunk.pb.h"
+#include "net.h"
 
 #define BUFFER 4096
 
-int runServer(void) {
+int runServer(const unsigned int port) {
    GOOGLE_PROTOBUF_VERIFY_VERSION;
+    if (port < MIN_PORT || port > MAX_PORT) {
+      perror("Invalid port!");
+      exit(EXIT_FAILURE);
+      return -1;
+    }
 
    int sockfd;
    struct sockaddr_in serverAddr, clientAddr;
@@ -30,12 +37,23 @@ int runServer(void) {
 
    serverAddr.sin_family = AF_INET; // IPv4 
    serverAddr.sin_addr.s_addr = INADDR_ANY; 
-   serverAddr.sin_port = htons(PORT); 
+   serverAddr.sin_port = htons(port); 
 
    if (bind(sockfd, (const struct sockaddr *)&serverAddr, sizeof(serverAddr)) < 0) {
       perror("bind failed"); 
       exit(EXIT_FAILURE); 
       return -1;
+   }
+
+   sockaddr_in boundAddr{};
+   socklen_t len = sizeof(boundAddr);
+   if (getsockname(sockfd, reinterpret_cast<sockaddr*>(&boundAddr), &len) == 0) {
+    std::cout << "Server running on "
+              << inet_ntoa(boundAddr.sin_addr)
+              << ":" << ntohs(boundAddr.sin_port)
+              << std::endl;
+   } else {
+       perror("getsockname failed");
    }
 
    while (true) {
@@ -52,6 +70,11 @@ int runServer(void) {
 
       if (n < 0) {
          perror("recvfrom failed");
+         continue;
+      }
+
+      if (n > BUFFER) {
+         std::cerr << "Received packet larger than buffer — dropping\n";
          continue;
       }
 

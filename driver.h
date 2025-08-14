@@ -1,8 +1,10 @@
 #ifndef DRIVER_H
 #define DRIVER_H
 
+#include <string>
+
 #define PORT 8080
 
-int runDriver(const char *filename);
+int runDriver(const std::string &addr, const std::string &filename);
 
 #endif

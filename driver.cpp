@@ -3,40 +3,34 @@
 #include <fstream>
 #include <stdlib.h> 
 #include <unistd.h> 
-#include <string.h> 
 #include <sys/types.h> 
 #include <sys/socket.h> 
 #include <arpa/inet.h> 
 #include <netinet/in.h> 
 #include "driver.h"
 #include "filechunk.pb.h"
+#include "net.h"
 
 #define BUFFER_SIZE 1024
 
-int runDriver(const char *filename) {
+int runDriver(const std::string &addr, const std::string &filename) {
    GOOGLE_PROTOBUF_VERIFY_VERSION;
 
    std::ifstream file(filename, std::ios::binary | std::ios::ate);
    if (!file) {
-      perror("socket creation failed"); 
+      perror("cannot open selected file"); 
       exit(EXIT_FAILURE); 
       return -1;
    }
 
    int sockfd;
-   struct sockaddr_in serverAddr;
-
    if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
       perror("socket creation failed"); 
       exit(EXIT_FAILURE); 
       return -1;
    }
-   
-   memset(&serverAddr, 0, sizeof(serverAddr));
-   serverAddr.sin_family = AF_INET; 
-   serverAddr.sin_port = htons(PORT); 
-   serverAddr.sin_addr.s_addr = INADDR_ANY; 
-
+  
+   const sockaddr_in serverAddr = parseAddress(addr);
    std::streamsize fileSize = file.tellg();
    file.seekg(0, std::ios::beg);
 
