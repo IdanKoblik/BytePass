@@ -5,8 +5,6 @@ Lightweight P2P File Transfer
 
 [![Platforms](https://img.shields.io/badge/Platforms-Linux-blue)]()
 
---- 
-
 ### Getting started
 Read the following guide to install bytepass on your machine:
 
