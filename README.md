@@ -23,3 +23,25 @@ make
 ./echo-ft
 ```
 
+### Usage
+There is 2 main options to communicate with the program.
+
+#### Dialog 
+
+```bash
+./echo-ft
+```
+
+This will lead you to a dialog with the program to handle receiving and sending data.
+
+#### Flags
+
+```bash
+# Receiver Flags
+./echo-ft --mode=receiver --port=8080
+
+# Sender Flags
+./echo-ft --mode=sender --addr=0.0.0.0:8080 --filename=test.txt
+```
+
+In this way you providing the program the parameters it needs to operate.
