@@ -1,0 +1,6 @@
+blank_issues_enabled: true
+
+contact_links:
+  - name: "For bug reports, please check if your issue already exists before submitting."
+    url: "https://github.com/IdanKoblik/BytePass/issues"
+    about: "GitHub issues"
