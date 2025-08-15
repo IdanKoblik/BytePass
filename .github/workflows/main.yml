@@ -1,0 +1,58 @@
+name: Main pipeline workflow
+
+on:
+  pull_request:
+    branches:
+      - main
+      - 11-cicd # TODO REMOVE
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      name:
+        description: 'Version name'
+        required: true
+        type: string
+
+permissions:
+pull-requests: write
+contents: write
+repository-projects: write
+packages: write
+pages: write
+id-token: write
+
+jobs:
+  checkout:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get_version.outputs.VERSION }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Output version
+        run: echo "The version is ${{ steps.get_version.outputs.VERSION }}"
+
+  run_tests:
+    needs: checkout
+    uses: ./.github/workflows/callable.test.yml
+    with:
+      VERSION: ${{ github.event.inputs.name }}
+
+  #build:
+  #  needs: run_tests
+  #  if: github.event_name == 'pull_request'
+  #  uses: ./.github/workflows/callable.build.yml
+  #  with:
+  #    VERSION: ${{ github.event.inputs.name }}
+
+  #github_release:
+  #  needs: run_tests
+  #  if: github.event_name == 'workflow_dispatch'
+  #  uses: ./.github/workflows/callable.release.yml
+  #  with:
+  #    VERSION: ${{ github.event.inputs.name }}
