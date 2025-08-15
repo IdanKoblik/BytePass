@@ -55,12 +55,12 @@ jobs:
         # Create pkg-config file for gtest
         sudo mkdir -p /usr/lib/pkgconfig
         cat << EOF | sudo tee /usr/lib/pkgconfig/gtest.pc
-Name: gtest
-Description: GoogleTest
-Version: 1.0
-Libs: -lgtest -lgtest_main -pthread
-Cflags: -I/usr/include
-EOF
+        Name: gtest
+        Description: GoogleTest
+        Version: 1.0
+        Libs: -lgtest -lgtest_main -pthread
+        Cflags: -I/usr/include
+        EOF
     
 
     - name: Build project
