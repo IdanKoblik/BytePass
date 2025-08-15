@@ -38,7 +38,7 @@ jobs:
       run: |
         git clone https://github.com/protocolbuffers/protobuf.git
         cd protobuf
-        git checkout 31.1 
+        git checkout v31.1 
         mkdir build && cd build
         cmake -Dprotobuf_BUILD_TESTS=OFF -DCMAKE_CXX_STANDARD=17 -DBUILD_SHARED_LIBS=ON ..
         make -j$(nproc)
