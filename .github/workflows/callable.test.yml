@@ -26,6 +26,11 @@ jobs:
           sudo make
           sudo cp lib/*.a /usr/lib
 
+      - name: Install Protoc
+        uses: arduino/setup-protoc@v3
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+      
       - name: Build project
         run: |
           make
