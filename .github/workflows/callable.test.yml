@@ -2,7 +2,7 @@ name: Run tests
 
 on:
   workflow_call:
-    inputes:
+    inputs:
       VERSION:
         required: true
         description: 'Version name'
