@@ -15,10 +15,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install dependencies (GoogleTest, build tools)
+
+      - name: Install dependencies (GoogleTest, protobuf, abseil, build tools)
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake make g++ libgtest-dev
+          sudo apt-get install -y \
+            cmake make g++ pkg-config \
+            libgtest-dev \
+            protobuf-compiler libprotobuf-dev \
+            libabsl-dev
+          
           # Build and install GoogleTest
           cd /usr/src/gtest
           sudo cmake .
