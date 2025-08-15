@@ -14,7 +14,7 @@ jobs:
     
     steps:
     - uses: actions/checkout@v4
-    
+   
     - name: Install dependencies
       run: |
         sudo apt-get update
@@ -22,14 +22,9 @@ jobs:
           build-essential \
           pkg-config \
           cmake \
-          libssl-dev
-   
-          # Build and install GoogleTest 
-          cd /usr/src/gtest 
-          sudo cmake . 
-          sudo make 
-          sudo cp lib/*.a /usr/lib
-
+          libssl-dev \
+          libgtest-dev
+    
     - name: Install Abseil
       run: |
         git clone https://github.com/abseil/abseil-cpp.git
@@ -44,13 +39,30 @@ jobs:
       run: |
         git clone https://github.com/protocolbuffers/protobuf.git
         cd protobuf
-        git checkout v31.1 
+        git checkout v25.3  # Use a stable version
         mkdir build && cd build
         cmake -Dprotobuf_BUILD_TESTS=OFF -DCMAKE_CXX_STANDARD=17 -DBUILD_SHARED_LIBS=ON ..
         make -j$(nproc)
         sudo make install
         sudo ldconfig
     
+    - name: Build and install GoogleTest
+      run: |
+        cd /usr/src/gtest
+        sudo cmake .
+        sudo make
+        sudo cp lib/*.a /usr/lib/
+        # Create pkg-config file for gtest
+        sudo mkdir -p /usr/lib/pkgconfig
+        cat << EOF | sudo tee /usr/lib/pkgconfig/gtest.pc
+Name: gtest
+Description: GoogleTest
+Version: 1.0
+Libs: -lgtest -lgtest_main -pthread
+Cflags: -I/usr/include
+EOF
+    
+
     - name: Build project
       run: make
     
