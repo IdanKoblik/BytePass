@@ -23,7 +23,13 @@ jobs:
           pkg-config \
           cmake \
           libssl-dev
-    
+   
+          # Build and install GoogleTest 
+          cd /usr/src/gtest 
+          sudo cmake . 
+          sudo make 
+          sudo cp lib/*.a /usr/lib
+
     - name: Install Abseil
       run: |
         git clone https://github.com/abseil/abseil-cpp.git
