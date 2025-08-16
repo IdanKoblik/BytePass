@@ -24,6 +24,20 @@ jobs:
           libgtest-dev \
           lcov
     
+    # Cache Protocol Buffers installation
+    - name: Cache Protocol Buffers
+      id: cache-protobuf
+      uses: actions/cache@v4
+      with:
+        path: |
+          /usr/local/lib/libproto*
+          /usr/local/lib/pkgconfig/protobuf*
+          /usr/local/include/google
+          /usr/local/bin/protoc
+        key: protobuf-v31.1-${{ runner.os }}-${{ runner.arch }}
+        restore-keys: |
+          protobuf-v31.1-${{ runner.os }}-
+    
     - name: Install Abseil
       run: |
         git clone https://github.com/abseil/abseil-cpp.git
@@ -35,6 +49,7 @@ jobs:
         sudo ldconfig
     
     - name: Install Protocol Buffers
+      if: steps.cache-protobuf.outputs.cache-hit != 'true'
       run: |
         git clone https://github.com/protocolbuffers/protobuf.git
         cd protobuf
@@ -44,6 +59,10 @@ jobs:
         make -j$(nproc)
         sudo make install
         sudo ldconfig
+    
+    - name: Update ldconfig after cache restore
+      if: steps.cache-protobuf.outputs.cache-hit == 'true'
+      run: sudo ldconfig
     
     - name: Build and install GoogleTest
       run: |
