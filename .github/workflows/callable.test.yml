@@ -14,81 +14,118 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - name: Cache dependencies
+      - name: Cache build dependencies
         uses: actions/cache@v4
         with:
           path: |
             ~/.cache
             /usr/local/lib
             /usr/local/include
-          key: ${{ runner.os }}-deps-${{ hashFiles('**/Makefile') }}
+            /tmp/abseil-cpp
+            /tmp/protobuf
+          key: ${{ runner.os }}-build-deps-v2-${{ hashFiles('**/Makefile') }}
           restore-keys: |
-            ${{ runner.os }}-deps-
+            ${{ runner.os }}-build-deps-v2-
+            ${{ runner.os }}-build-deps-
       
-      - name: Install dependencies
+      - name: Install system dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y \
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq \
             build-essential \
             pkg-config \
             cmake \
             libssl-dev \
             libgtest-dev \
-            lcov
+            lcov \
+            ccache
+          # Enable ccache for faster rebuilds
+          echo "/usr/lib/ccache" >> $GITHUB_PATH
             
-      - name: Install Abseil
+      - name: Install Abseil (cached)
         run: |
           if [ ! -d "/usr/local/lib/cmake/absl" ]; then
-            git clone https://github.com/abseil/abseil-cpp.git
-            cd abseil-cpp
-            mkdir build && cd build
-            cmake -DCMAKE_CXX_STANDARD=17 -DABSL_PROPAGATE_CXX_STD=ON -DBUILD_SHARED_LIBS=ON ..
-            make -j$(nproc)
-            sudo make install
+            echo "Building Abseil..."
+            if [ ! -d "/tmp/abseil-cpp" ]; then
+              git clone --depth=1 --branch=20240116.2 https://github.com/abseil/abseil-cpp.git /tmp/abseil-cpp
+            fi
+            cd /tmp/abseil-cpp
+            mkdir -p build && cd build
+            cmake -DCMAKE_CXX_STANDARD=17 \
+                  -DABSL_PROPAGATE_CXX_STD=ON \
+                  -DBUILD_SHARED_LIBS=ON \
+                  -DCMAKE_BUILD_TYPE=Release \
+                  -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+                  ..
+            make -j$(nproc) --silent
+            sudo make install --silent
             sudo ldconfig
           else
             echo "Abseil already cached"
           fi
          
-      - name: Install Protocol Buffers
+      - name: Install Protocol Buffers (optimized)
         run: |
-          git clone https://github.com/protocolbuffers/protobuf.git
-          cd protobuf
-          git checkout v31.1
-          mkdir build && cd build
-          cmake -Dprotobuf_BUILD_TESTS=OFF -DCMAKE_CXX_STANDARD=17 -DBUILD_SHARED_LIBS=ON ..
-          make -j$(nproc)
-          sudo make install
-          sudo ldconfig
-
-      - name: Build and install GoogleTest
+          if [ ! -f "/usr/local/lib/libprotobuf.so" ]; then
+            echo "Building Protobuf..."
+            if [ ! -d "/tmp/protobuf" ]; then
+              git clone --depth=1 --branch=v3.21.12 https://github.com/protocolbuffers/protobuf.git /tmp/protobuf
+            fi
+            cd /tmp/protobuf
+            mkdir -p build && cd build
+            cmake -Dprotobuf_BUILD_TESTS=OFF \
+                  -DCMAKE_CXX_STANDARD=17 \
+                  -DBUILD_SHARED_LIBS=ON \
+                  -Dprotobuf_MSVC_STATIC_RUNTIME=OFF \
+                  -DCMAKE_BUILD_TYPE=Release \
+                  -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+                  ..
+            make -j$(nproc) --silent
+            sudo make install --silent
+            sudo ldconfig
+          else
+            echo "Protobuf already cached"
+          fi
+          
+      - name: Setup GoogleTest (optimized)
         run: |
-          cd /usr/src/gtest
-          sudo cmake .
-          sudo make
-          sudo cp lib/*.a /usr/lib/
-          # Create pkg-config file for gtest
-          sudo mkdir -p /usr/lib/pkgconfig
-          cat << EOF | sudo tee /usr/lib/pkgconfig/gtest.pc
+          if [ ! -f "/usr/lib/pkgconfig/gtest.pc" ]; then
+            cd /usr/src/gtest
+            sudo cmake . --quiet
+            sudo make --silent
+            sudo cp lib/*.a /usr/lib/ 2>/dev/null || sudo cp *.a /usr/lib/
+            # Create pkg-config file for gtest
+            sudo mkdir -p /usr/lib/pkgconfig
+            cat << EOF | sudo tee /usr/lib/pkgconfig/gtest.pc > /dev/null
           Name: gtest
           Description: GoogleTest
           Version: 1.0
           Libs: -lgtest -lgtest_main -pthread
           Cflags: -I/usr/include
           EOF
+          else
+            echo "GoogleTest already configured"
+          fi
           
-      - name: Clean previous build artifacts
+      - name: Build and test with coverage
         run: |
+          # Clean any stale coverage files
           find . -name "*.gcda" -o -name "*.gcno" -delete 2>/dev/null || true
-          
-      - name: Build project
-        run: make clean && make
+          # Build and run tests in one step
+          make coverage
         
-      - name: Run tests
-        run: make coverage
-        
-      - name: Coveralls GitHub Action
-        uses: coverallsapp/github-action@v2.3.6
+      - name: Upload coverage to Coveralls
+        uses: coverallsapp/github-action@v2.3.12
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path-to-lcov: coverage.info
+          flag-name: run-tests
+          parallel: false
+          
+      - name: Archive coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: coverage-report/
+          retention-days: 7
