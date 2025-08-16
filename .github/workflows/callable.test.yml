@@ -49,14 +49,18 @@ jobs:
           else
             echo "Abseil already cached"
           fi
-          
+         
       - name: Install Protocol Buffers
         run: |
-          # Use pre-compiled protobuf from apt instead of building from source
-          sudo apt-get install -y \
-            libprotobuf-dev \
-            protobuf-compiler
-          
+          git clone https://github.com/protocolbuffers/protobuf.git
+          cd protobuf
+          git checkout v31.1
+          mkdir build && cd build
+          cmake -Dprotobuf_BUILD_TESTS=OFF -DCMAKE_CXX_STANDARD=17 -DBUILD_SHARED_LIBS=ON ..
+          make -j$(nproc)
+          sudo make install
+          sudo ldconfig
+
       - name: Build and install GoogleTest
         run: |
           cd /usr/src/gtest
