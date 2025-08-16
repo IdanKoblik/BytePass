@@ -1,6 +1,6 @@
 CXX = g++
-CXXFLAGS = -std=c++17 -pthread -O0 -fprofile-arcs -ftest-coverage
-LDFLAGS = -fprofile-arcs -ftest-coverage
+CXXFLAGS = -std=c++17 -pthread -g -O0 -fprofile-arcs -ftest-coverage --coverage
+LDFLAGS = -fprofile-arcs -ftest-coverage --coverage
 PROTOC = protoc
 PKG_CONFIG = pkg-config
 
@@ -27,8 +27,8 @@ $(PROTO_SRCS) $(PROTO_HDRS): $(PROTO_FILES)
 $(TARGET): $(SRCS) $(PROTO_SRCS)
 	$(CXX) $(CXXFLAGS) $(SRCS) `$(PKG_CONFIG) --cflags --libs protobuf` -o $(TARGET)
 
-$(TEST_TARGET): $(TEST_OBJS) $(OBJS_NOT_MAIN)
-	$(CXX) $(CXXFLAGS) $(TEST_OBJS) $(OBJS_NOT_MAIN) `pkg-config --cflags --libs protobuf gtest gtest_main` -o $(TEST_TARGET)
+$(TEST_TARGET): clean-coverage $(TEST_OBJS) $(OBJS_NOT_MAIN)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(TEST_OBJS) $(OBJS_NOT_MAIN) `pkg-config --cflags --libs protobuf gtest gtest_main` -o $(TEST_TARGET)
 
 test/%.o: test/%.cpp
 	$(CXX) $(CXXFLAGS) -I. `pkg-config --cflags protobuf gtest` -c $< -o $@
@@ -36,20 +36,32 @@ test/%.o: test/%.cpp
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -I. `pkg-config --cflags protobuf` -c $< -o $@
 
+# Separate target for building with coverage
+coverage-build: clean-coverage $(PROTO_SRCS) $(PROTO_HDRS)
+	$(MAKE) CXXFLAGS="$(CXXFLAGS)" LDFLAGS="$(LDFLAGS)" $(TEST_TARGET)
+
 test: $(TEST_TARGET)
 	./$(TEST_TARGET)
 
-coverage: clean-coverage $(TEST_TARGET)
+coverage: coverage-build
 	@echo "Running tests and generating coverage..."
 	./$(TEST_TARGET)
 	@echo "Generating coverage report..."
 	@if command -v lcov >/dev/null 2>&1; then \
 		lcov --capture --directory . --output-file coverage.info \
 			--rc geninfo_unexecuted_blocks=1 \
-			--ignore-errors inconsistent,unused,gcov,source; \
-		lcov --remove coverage.info "*/filechunk.pb.*" "/usr/*" --output-file coverage.info; \
-		genhtml coverage.info --output-directory coverage-report; \
-		echo "Coverage report generated in coverage-report/"; \
+			--ignore-errors inconsistent,unused,gcov,source,mismatch; \
+		lcov --remove coverage.info "*/filechunk.pb.*" "/usr/*" "*test*" --output-file coverage.info \
+			--ignore-errors empty,unused; \
+		if [ -s coverage.info ]; then \
+			genhtml coverage.info --output-directory coverage-report \
+				--ignore-errors empty; \
+			echo "Coverage report generated in coverage-report/"; \
+		else \
+			echo "Warning: No coverage data found. Creating empty report."; \
+			mkdir -p coverage-report; \
+			echo "<html><body><h1>No Coverage Data</h1><p>No valid coverage data was found.</p></body></html>" > coverage-report/index.html; \
+		fi; \
 	else \
 		echo "Error: lcov is not installed. Please install lcov to generate coverage reports."; \
 		exit 1; \
@@ -65,4 +77,20 @@ clean: clean-coverage
 	rm -f $(TARGET) $(TEST_TARGET) *.o test/*.o *.gcov coverage.info
 	rm -rf coverage-report
 
-.PHONY: all test coverage clean clean-coverage
+debug-coverage: coverage-build
+	@echo "=== Coverage Debug Info ==="
+	@echo "GCC Version: $(gcc --version | head -1)"
+	@echo "LCOV Version: $(lcov --version 2>/dev/null || echo 'Not installed')"
+	@echo "GCOV Files found:"
+	@find . -name "*.gcda" -o -name "*.gcno" | head -10
+	@echo "Running test..."
+	./$(TEST_TARGET)
+	@echo "Coverage files after test run:"
+	@find . -name "*.gcda" | head -10
+	@echo "Attempting coverage capture with verbose output..."
+	lcov --capture --directory . --output-file coverage-debug.info \
+		--rc geninfo_unexecuted_blocks=1 \
+		--ignore-errors inconsistent,unused,gcov,source,mismatch \
+		|| echo "Coverage capture failed"
+
+.PHONY: all test coverage clean clean-coverage coverage-build debug-coverage
