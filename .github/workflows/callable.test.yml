@@ -85,25 +85,23 @@ jobs:
             echo "Protobuf already cached"
           fi
          
-      - name: Setup GoogleTest (optimized)
-        run: |
-          if [ ! -f "/usr/lib/pkgconfig/gtest.pc" ]; then
-            cd /usr/src/gtest
-            sudo cmake . --quiet
-            sudo make --silent
-            sudo cp lib/*.a /usr/lib/ 2>/dev/null || sudo cp *.a /usr/lib/
-            # Create pkg-config file for gtest
-            sudo mkdir -p /usr/lib/pkgconfig
-            cat << EOF | sudo tee /usr/lib/pkgconfig/gtest.pc > /dev/null
-          Name: gtest
-          Description: GoogleTest
-          Version: 1.0
-          Libs: -lgtest -lgtest_main -pthread
-          Cflags: -I/usr/include
-          EOF
-          else
-            echo "GoogleTest already configured"
-          fi
+    - name: Build and install GoogleTest
+
+      run: |
+        cd /usr/src/gtest
+        sudo cmake .
+        sudo make
+        sudo cp lib/*.a /usr/lib/
+
+        # Create pkg-config file for gtest
+        sudo mkdir -p /usr/lib/pkgconfig
+        cat << EOF | sudo tee /usr/lib/pkgconfig/gtest.pc
+        Name: gtest
+        Description: GoogleTest
+        Version: 1.0
+        Libs: -lgtest -lgtest_main -pthread
+        Cflags: -I/usr/include
+        EOF
           
       - name: Build and test with coverage
         run: |
