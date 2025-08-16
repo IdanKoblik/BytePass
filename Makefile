@@ -39,12 +39,14 @@ test/%.o: test/%.cpp
 test: $(TEST_TARGET)
 	./$(TEST_TARGET)
 
-coverage: clean-coverage test
+coverage: clean-coverage $(TEST_TARGET)
+	@echo "Running tests and generating coverage..."
+	./$(TEST_TARGET)
 	@echo "Generating coverage report..."
 	@if command -v lcov >/dev/null 2>&1; then \
 		lcov --capture --directory . --output-file coverage.info \
 			--rc geninfo_unexecuted_blocks=1 \
-			--ignore-errors inconsistent,unused; \
+			--ignore-errors inconsistent,unused,gcov,source; \
 		lcov --remove coverage.info "*/filechunk.pb.*" "/usr/*" --output-file coverage.info; \
 		genhtml coverage.info --output-directory coverage-report; \
 		echo "Coverage report generated in coverage-report/"; \
@@ -55,7 +57,9 @@ coverage: clean-coverage test
 
 clean-coverage:
 	@echo "Cleaning coverage files..."
-	find . -name "*.gcda" -o -name "*.gcno" -delete
+	find . -name "*.gcda" -delete 2>/dev/null || true
+	find . -name "*.gcno" -delete 2>/dev/null || true
+	rm -f coverage.info
 
 clean: clean-coverage
 	rm -f $(TARGET) $(TEST_TARGET) *.o test/*.o *.gcov coverage.info

@@ -14,6 +14,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache
+            /usr/local/lib
+            /usr/local/include
+          key: ${{ runner.os }}-deps-${{ hashFiles('**/Makefile') }}
+          restore-keys: |
+            ${{ runner.os }}-deps-
+      
       - name: Install dependencies
         run: |
           sudo apt-get update
@@ -27,24 +38,24 @@ jobs:
             
       - name: Install Abseil
         run: |
-          git clone https://github.com/abseil/abseil-cpp.git
-          cd abseil-cpp
-          mkdir build && cd build
-          cmake -DCMAKE_CXX_STANDARD=17 -DABSL_PROPAGATE_CXX_STD=ON -DBUILD_SHARED_LIBS=ON ..
-          make -j$(nproc)
-          sudo make install
-          sudo ldconfig
+          if [ ! -d "/usr/local/lib/cmake/absl" ]; then
+            git clone https://github.com/abseil/abseil-cpp.git
+            cd abseil-cpp
+            mkdir build && cd build
+            cmake -DCMAKE_CXX_STANDARD=17 -DABSL_PROPAGATE_CXX_STD=ON -DBUILD_SHARED_LIBS=ON ..
+            make -j$(nproc)
+            sudo make install
+            sudo ldconfig
+          else
+            echo "Abseil already cached"
+          fi
           
       - name: Install Protocol Buffers
         run: |
-          git clone https://github.com/protocolbuffers/protobuf.git
-          cd protobuf
-          git checkout v31.1
-          mkdir build && cd build
-          cmake -Dprotobuf_BUILD_TESTS=OFF -DCMAKE_CXX_STANDARD=17 -DBUILD_SHARED_LIBS=ON ..
-          make -j$(nproc)
-          sudo make install
-          sudo ldconfig
+          # Use pre-compiled protobuf from apt instead of building from source
+          sudo apt-get install -y \
+            libprotobuf-dev \
+            protobuf-compiler
           
       - name: Build and install GoogleTest
         run: |
@@ -64,11 +75,10 @@ jobs:
           
       - name: Clean previous build artifacts
         run: |
-          make clean
-          find . -name "*.gcda" -o -name "*.gcno" -delete
+          find . -name "*.gcda" -o -name "*.gcno" -delete 2>/dev/null || true
           
       - name: Build project
-        run: make
+        run: make clean && make
         
       - name: Run tests
         run: make coverage
