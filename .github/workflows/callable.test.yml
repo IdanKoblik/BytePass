@@ -67,4 +67,10 @@ jobs:
       run: make
     
     - name: Run tests
-      run: make test
+      run: make coverage 
+
+    - name: Coveralls GitHub Action
+      uses: coverallsapp/github-action@v2.3.6
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        path-to-lcov: coverage.info
