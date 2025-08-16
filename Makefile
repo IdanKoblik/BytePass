@@ -3,10 +3,12 @@ CXXFLAGS = -std=c++17 -pthread -O0 -fprofile-arcs -ftest-coverage
 LDFLAGS = -fprofile-arcs -ftest-coverage
 PROTOC = protoc
 PKG_CONFIG = pkg-config
+
 PROTOC_FLAGS = -I=.
 PROTO_FILES = filechunk.proto
 PROTO_SRCS = filechunk.pb.cc
 PROTO_HDRS = filechunk.pb.h
+
 SRCS = $(wildcard *.cpp) $(PROTO_SRCS)
 OBJS = $(SRCS:.cpp=.o)
 TARGET = echo-ft
@@ -37,16 +39,26 @@ test/%.o: test/%.cpp
 test: $(TEST_TARGET)
 	./$(TEST_TARGET)
 
-coverage: test
-	lcov --capture --directory . --output-file coverage.info \
-	     --rc geninfo_unexecuted_blocks=1 \
-	     --ignore-errors inconsistent,unused
-	# Remove generated protobuf + system headers
-	lcov --remove coverage.info "*/filechunk.pb.*" "/usr/*" --output-file coverage.info
-	genhtml coverage.info --output-directory coverage-report
+coverage: clean-coverage test
+	@echo "Generating coverage report..."
+	@if command -v lcov >/dev/null 2>&1; then \
+		lcov --capture --directory . --output-file coverage.info \
+			--rc geninfo_unexecuted_blocks=1 \
+			--ignore-errors inconsistent,unused; \
+		lcov --remove coverage.info "*/filechunk.pb.*" "/usr/*" --output-file coverage.info; \
+		genhtml coverage.info --output-directory coverage-report; \
+		echo "Coverage report generated in coverage-report/"; \
+	else \
+		echo "Error: lcov is not installed. Please install lcov to generate coverage reports."; \
+		exit 1; \
+	fi
+
+clean-coverage:
+	@echo "Cleaning coverage files..."
 	find . -name "*.gcda" -o -name "*.gcno" -delete
 
-clean:
-	rm -f $(TARGET) $(TEST_TARGET) *.o test/*.o *.gcda *.gcno *.gcov coverage.info
+clean: clean-coverage
+	rm -f $(TARGET) $(TEST_TARGET) *.o test/*.o *.gcov coverage.info
 	rm -rf coverage-report
 
+.PHONY: all test coverage clean clean-coverage

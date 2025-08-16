@@ -11,75 +11,70 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    
     steps:
-    - uses: actions/checkout@v4
-   
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y \
-          build-essential \
-          pkg-config \
-          cmake \
-          libssl-dev \
-          libgtest-dev \
-          lcov
-    
-    - name: Install GCC 15
-      run: |
-        sudo apt-get install -y gcc-15 g++-15
-        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-15 100
-        sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-15 100
-        gcc --version
-        g++ --version
-
-    - name: Install Abseil
-      run: |
-        git clone https://github.com/abseil/abseil-cpp.git
-        cd abseil-cpp
-        mkdir build && cd build
-        cmake -DCMAKE_CXX_STANDARD=17 -DABSL_PROPAGATE_CXX_STD=ON -DBUILD_SHARED_LIBS=ON ..
-        make -j$(nproc)
-        sudo make install
-        sudo ldconfig
-    
-    - name: Install Protocol Buffers
-      run: |
-        git clone https://github.com/protocolbuffers/protobuf.git
-        cd protobuf
-        git checkout v31.1 
-        mkdir build && cd build
-        cmake -Dprotobuf_BUILD_TESTS=OFF -DCMAKE_CXX_STANDARD=17 -DBUILD_SHARED_LIBS=ON ..
-        make -j$(nproc)
-        sudo make install
-        sudo ldconfig
-    
-    - name: Build and install GoogleTest
-      run: |
-        cd /usr/src/gtest
-        sudo cmake .
-        sudo make
-        sudo cp lib/*.a /usr/lib/
-        # Create pkg-config file for gtest
-        sudo mkdir -p /usr/lib/pkgconfig
-        cat << EOF | sudo tee /usr/lib/pkgconfig/gtest.pc
-        Name: gtest
-        Description: GoogleTest
-        Version: 1.0
-        Libs: -lgtest -lgtest_main -pthread
-        Cflags: -I/usr/include
-        EOF
-    
-
-    - name: Build project
-      run: make
-    
-    - name: Run tests
-      run: make coverage 
-
-    - name: Coveralls GitHub Action
-      uses: coverallsapp/github-action@v2.3.6
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        path-to-lcov: coverage.info
+      - uses: actions/checkout@v4
+      
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            pkg-config \
+            cmake \
+            libssl-dev \
+            libgtest-dev \
+            lcov
+            
+      - name: Install Abseil
+        run: |
+          git clone https://github.com/abseil/abseil-cpp.git
+          cd abseil-cpp
+          mkdir build && cd build
+          cmake -DCMAKE_CXX_STANDARD=17 -DABSL_PROPAGATE_CXX_STD=ON -DBUILD_SHARED_LIBS=ON ..
+          make -j$(nproc)
+          sudo make install
+          sudo ldconfig
+          
+      - name: Install Protocol Buffers
+        run: |
+          git clone https://github.com/protocolbuffers/protobuf.git
+          cd protobuf
+          git checkout v31.1
+          mkdir build && cd build
+          cmake -Dprotobuf_BUILD_TESTS=OFF -DCMAKE_CXX_STANDARD=17 -DBUILD_SHARED_LIBS=ON ..
+          make -j$(nproc)
+          sudo make install
+          sudo ldconfig
+          
+      - name: Build and install GoogleTest
+        run: |
+          cd /usr/src/gtest
+          sudo cmake .
+          sudo make
+          sudo cp lib/*.a /usr/lib/
+          # Create pkg-config file for gtest
+          sudo mkdir -p /usr/lib/pkgconfig
+          cat << EOF | sudo tee /usr/lib/pkgconfig/gtest.pc
+          Name: gtest
+          Description: GoogleTest
+          Version: 1.0
+          Libs: -lgtest -lgtest_main -pthread
+          Cflags: -I/usr/include
+          EOF
+          
+      - name: Clean previous build artifacts
+        run: |
+          make clean
+          find . -name "*.gcda" -o -name "*.gcno" -delete
+          
+      - name: Build project
+        run: make
+        
+      - name: Run tests
+        run: make coverage
+        
+      - name: Coveralls GitHub Action
+        uses: coverallsapp/github-action@v2.3.6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path-to-lcov: coverage.info
