@@ -23,8 +23,17 @@ jobs:
           pkg-config \
           cmake \
           libssl-dev \
-          libgtest-dev
+          libgtest-dev \
+          lcov
     
+    - name: Install GCC 15
+      run: |
+        sudo apt-get install -y gcc-15 g++-15
+        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-15 100
+        sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-15 100
+        gcc --version
+        g++ --version
+
     - name: Install Abseil
       run: |
         git clone https://github.com/abseil/abseil-cpp.git
