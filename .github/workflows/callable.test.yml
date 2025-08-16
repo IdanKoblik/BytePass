@@ -62,21 +62,28 @@ jobs:
             echo "Abseil already cached"
           fi
       
-      - name: Build protobuf library
+      - name: Install protobuf library (cached)
         run: |
-          git clone https://github.com/protocolbuffers/protobuf.git
-          cd protobuf
-          git submodule update --init --recursive
-          ./autogen.sh
-          ./configure
-          make
-          make check           
-          
-      - name: Install protobuf library
-        run: |
-          cd protobuf
-          sudo make install
-          sudo ldconfig
+          if [ ! -f "/usr/local/lib/libprotobuf.so" ]; then
+            echo "Building protobuf..."
+            if [ ! -d "/tmp/protobuf" ]; then
+              git clone --depth=1 --branch=v25.1 https://github.com/protocolbuffers/protobuf.git /tmp/protobuf
+            fi
+            cd /tmp/protobuf
+            git submodule update --init --recursive
+            mkdir -p build && cd build
+            cmake -DCMAKE_BUILD_TYPE=Release \
+                  -DCMAKE_CXX_STANDARD=17 \
+                  -Dprotobuf_BUILD_TESTS=OFF \
+                  -Dprotobuf_ABSL_PROVIDER=package \
+                  -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+                  ..
+            make -j$(nproc) --silent
+            sudo make install --silent
+            sudo ldconfig
+          else
+            echo "Protobuf already cached"
+          fi
          
       - name: Setup GoogleTest (optimized)
         run: |
