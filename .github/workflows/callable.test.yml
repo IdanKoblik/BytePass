@@ -85,23 +85,21 @@ jobs:
             echo "Protobuf already cached"
           fi
          
-    - name: Build and install GoogleTest
-
-      run: |
-        cd /usr/src/gtest
-        sudo cmake .
-        sudo make
-        sudo cp lib/*.a /usr/lib/
-
-        # Create pkg-config file for gtest
-        sudo mkdir -p /usr/lib/pkgconfig
-        cat << EOF | sudo tee /usr/lib/pkgconfig/gtest.pc
-        Name: gtest
-        Description: GoogleTest
-        Version: 1.0
-        Libs: -lgtest -lgtest_main -pthread
-        Cflags: -I/usr/include
-        EOF
+      - name: Build and install GoogleTest
+        run: |
+          cd /usr/src/gtest
+          sudo cmake .
+          sudo make
+          sudo cp lib/*.a /usr/lib/
+          # Create pkg-config file for gtest
+          sudo mkdir -p /usr/lib/pkgconfig
+          cat << EOF | sudo tee /usr/lib/pkgconfig/gtest.pc
+          Name: gtest
+          Description: GoogleTest
+          Version: 1.0
+          Libs: -lgtest -lgtest_main -pthread
+          Cflags: -I/usr/include
+          EOF
           
       - name: Build and test with coverage
         run: |
