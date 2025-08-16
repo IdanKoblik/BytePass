@@ -1,5 +1,4 @@
 name: Run tests
-
 on:
   workflow_call:
     inputs:
@@ -7,7 +6,6 @@ on:
         required: true
         description: 'Version name'
         type: string
-
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -64,16 +62,16 @@ jobs:
             echo "Abseil already cached"
           fi
       
-       - name: Build protobuf library
-         run: |
-           git clone https://github.com/protocolbuffers/protobuf.git
-           cd protobuf
-           git submodule update --init --recursive
-           ./autogen.sh
-           ./autogen.sh
-           ./configure
-           make
-           make check           
+      - name: Build protobuf library
+        run: |
+          git clone https://github.com/protocolbuffers/protobuf.git
+          cd protobuf
+          git submodule update --init --recursive
+          ./autogen.sh
+          ./configure
+          make
+          make check           
+          
       - name: Install protobuf library
         run: |
           cd protobuf
