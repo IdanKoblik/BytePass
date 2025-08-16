@@ -63,30 +63,23 @@ jobs:
           else
             echo "Abseil already cached"
           fi
-         
-      - name: Install Protocol Buffers (optimized)
+      
+       - name: Build protobuf library
+         run: |
+           git clone https://github.com/protocolbuffers/protobuf.git
+           cd protobuf
+           git submodule update --init --recursive
+           ./autogen.sh
+           ./autogen.sh
+           ./configure
+           make
+           make check           
+      - name: Install protobuf library
         run: |
-          if [ ! -f "/usr/local/lib/libprotobuf.so" ]; then
-            echo "Building Protobuf..."
-            if [ ! -d "/tmp/protobuf" ]; then
-              git clone --depth=1 --branch=v3.21.12 https://github.com/protocolbuffers/protobuf.git /tmp/protobuf
-            fi
-            cd /tmp/protobuf
-            mkdir -p build && cd build
-            cmake -Dprotobuf_BUILD_TESTS=OFF \
-                  -DCMAKE_CXX_STANDARD=17 \
-                  -DBUILD_SHARED_LIBS=ON \
-                  -Dprotobuf_MSVC_STATIC_RUNTIME=OFF \
-                  -DCMAKE_BUILD_TYPE=Release \
-                  -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
-                  ..
-            make -j$(nproc) --silent
-            sudo make install --silent
-            sudo ldconfig
-          else
-            echo "Protobuf already cached"
-          fi
-          
+          cd protobuf
+          sudo make install
+          sudo ldconfig
+         
       - name: Setup GoogleTest (optimized)
         run: |
           if [ ! -f "/usr/lib/pkgconfig/gtest.pc" ]; then
