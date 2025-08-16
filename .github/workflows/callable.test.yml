@@ -1,5 +1,4 @@
 name: Run tests
-
 on:
   workflow_call:
     inputs:
@@ -7,7 +6,6 @@ on:
         required: true
         description: 'Version name'
         type: string
-
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -23,7 +21,8 @@ jobs:
           pkg-config \
           cmake \
           libssl-dev \
-          libgtest-dev
+          libgtest-dev \
+          lcov
     
     - name: Install Abseil
       run: |
@@ -62,7 +61,6 @@ jobs:
         Cflags: -I/usr/include
         EOF
     
-
     - name: Build and test with coverage
       run: |
         # Clean any stale coverage files
