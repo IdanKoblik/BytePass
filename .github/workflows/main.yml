@@ -67,6 +67,7 @@ jobs:
             protobuf-v31.1-${{ runner.os }}-
       
       - name: Install Abseil
+        working-directory: ${{ github.workspace }}
         run: |
           git clone https://github.com/abseil/abseil-cpp.git
           cd abseil-cpp
@@ -78,6 +79,7 @@ jobs:
       
       - name: Install Protocol Buffers
         if: steps.cache-protobuf.outputs.cache-hit != 'true'
+        working-directory: ${{ github.workspace }}
         run: |
           git clone https://github.com/protocolbuffers/protobuf.git
           cd protobuf
@@ -94,21 +96,24 @@ jobs:
       
       - name: Build and install GoogleTest
         run: |
-          cd /usr/src/gtest
-          sudo cmake .
-          sudo make
-          sudo cp lib/*.a /usr/lib/
-          # Create pkg-config file for gtest
-          sudo mkdir -p /usr/lib/pkgconfig
-          cat << EOF | sudo tee /usr/lib/pkgconfig/gtest.pc
-          Name: gtest
-          Description: GoogleTest
-          Version: 1.0
-          Libs: -lgtest -lgtest_main -pthread
-          Cflags: -I/usr/include
-          EOF
+          (
+            cd /usr/src/gtest
+            sudo cmake .
+            sudo make
+            sudo cp lib/*.a /usr/lib/
+            # Create pkg-config file for gtest
+            sudo mkdir -p /usr/lib/pkgconfig
+            cat << EOF | sudo tee /usr/lib/pkgconfig/gtest.pc
+            Name: gtest
+            Description: GoogleTest
+            Version: 1.0
+            Libs: -lgtest -lgtest_main -pthread
+            Cflags: -I/usr/include
+            EOF
+          )
       
       - name: Build and test with coverage
+        working-directory: ${{ github.workspace }}
         run: |
           # Clean any stale coverage files
           find . -name "*.gcda" -o -name "*.gcno" -delete 2>/dev/null || true
@@ -131,9 +136,9 @@ jobs:
           path: coverage-report/
 
       - name: Build
+        working-directory: ${{ github.workspace }}
         run: |
           ls
-
           make 
-
           ls
+
