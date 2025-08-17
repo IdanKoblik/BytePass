@@ -14,8 +14,9 @@
 
 #define BUFFER 4096
 
-int runServer(const unsigned int port) {
+int runServer(const unsigned int port, const std::string &outputDir) {
    GOOGLE_PROTOBUF_VERIFY_VERSION;
+
     if (port < MIN_PORT || port > MAX_PORT) {
       std::cerr << "Invalid port!" << std::endl;
       return -1;
@@ -52,6 +53,9 @@ int runServer(const unsigned int port) {
       std::cerr << "getsockname failed" << std::endl;
    }
 
+   std::map<int, std::string> chunks;
+   std::string filename;
+
    while (true) {
       char buffer[BUFFER]; 
       socklen_t len = sizeof(clientAddr);
@@ -87,6 +91,33 @@ int runServer(const unsigned int port) {
       std::cout << "CHUNK: " << chunk.index() << std::endl;
       std::cout << "Filename: " << chunk.filename() << std::endl;
       std::cout << "Data size: " << chunk.data().size() << " bytes" << std::endl;
+   
+      if (filename.empty()) 
+         filename = outputDir + "/" + chunk.filename();
+
+      chunks[chunk.index()] = chunk.data();
+      if (chunk.index() == -1) {
+         std::cout << "Final chunk marker received. Writing file..." << std::endl;
+
+         std::ofstream ofs(filename, std::ios::binary | std::ios::out | std::ios::trunc);
+         if (!ofs) {
+            std::cerr << "Failed to open output file " << filename << std::endl;
+            break;
+         }
+
+         for (int i = 0; i < chunks.size() - 1; i++) {
+            std::string &chunk = chunks[i];
+            ofs.write(chunk.data(), chunk.size());
+         }
+
+         std::string &finalChunk = chunks[-1];
+         ofs.write(finalChunk.data(), finalChunk.size());
+          
+         ofs.close();
+         std::cout << "File reconstructed: " << filename << std::endl;
+         break;
+      }
+     
    }
 
    google::protobuf::ShutdownProtobufLibrary();

@@ -43,7 +43,7 @@ int runDriver(const std::string &addr, const std::string &filename) {
       protocol::FileChunk chunk;
       chunk.set_filename(filename);
       chunk.set_data(buffer.data(), toRead);
-      chunk.set_index(i);
+      chunk.set_index((i == chunksCount - 1) ? -1 : i);
 
       std::string serializedChunk;
       if (!chunk.SerializeToString(&serializedChunk)) {
