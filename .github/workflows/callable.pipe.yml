@@ -1,4 +1,5 @@
-name: Run tests
+name: Lazy pipeline 
+
 on:
   workflow_call:
     inputs:
