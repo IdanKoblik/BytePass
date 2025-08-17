@@ -18,15 +18,13 @@ int runDriver(const std::string &addr, const std::string &filename) {
 
    std::ifstream file(filename, std::ios::binary | std::ios::ate);
    if (!file) {
-      perror("cannot open selected file"); 
-      exit(EXIT_FAILURE); 
+      std::cerr << "Cannot open selected file" << std::endl;
       return -1;
    }
 
    int sockfd;
    if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-      perror("socket creation failed"); 
-      exit(EXIT_FAILURE); 
+      std::cerr << "Socket creation failed" << std::endl;
       return -1;
    }
   

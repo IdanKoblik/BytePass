@@ -1,6 +1,5 @@
 #include <absl/strings/internal/str_format/extension.h>
 #include <bits/stdc++.h> 
-#include <cstdlib>
 #include <google/protobuf/message_lite.h>
 #include <stdlib.h> 
 #include <unistd.h> 
@@ -18,8 +17,7 @@
 int runServer(const unsigned int port) {
    GOOGLE_PROTOBUF_VERIFY_VERSION;
     if (port < MIN_PORT || port > MAX_PORT) {
-      perror("Invalid port!");
-      exit(EXIT_FAILURE);
+      std::cerr << "Invalid port!" << std::endl;
       return -1;
     }
 
@@ -27,8 +25,7 @@ int runServer(const unsigned int port) {
    struct sockaddr_in serverAddr, clientAddr;
 
    if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-      perror("socket creation failed"); 
-      exit(EXIT_FAILURE);    
+      std::cerr << "socket creation failed" << std::endl;
       return -1;
    }
 
@@ -40,8 +37,7 @@ int runServer(const unsigned int port) {
    serverAddr.sin_port = htons(port); 
 
    if (bind(sockfd, (const struct sockaddr *)&serverAddr, sizeof(serverAddr)) < 0) {
-      perror("bind failed"); 
-      exit(EXIT_FAILURE); 
+      std::cerr << "Bind failed" << std::endl;
       return -1;
    }
 
@@ -53,7 +49,7 @@ int runServer(const unsigned int port) {
               << ":" << ntohs(boundAddr.sin_port)
               << std::endl;
    } else {
-       perror("getsockname failed");
+      std::cerr << "getsockname failed" << std::endl;
    }
 
    while (true) {
@@ -69,7 +65,7 @@ int runServer(const unsigned int port) {
       );
 
       if (n < 0) {
-         perror("recvfrom failed");
+         std::cerr << "recvfrom failed" << std::endl;
          continue;
       }
 
