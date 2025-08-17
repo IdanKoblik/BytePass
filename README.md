@@ -4,6 +4,7 @@ Lightweight P2P File Transfer
 > ⚠️ **Development Status**: This project is currently in development, and usage is at your own risk as features, stability, and security may change without notice.
 
 [![Platforms](https://img.shields.io/badge/Platforms-Linux-blue)]()
+[![Coverage Status](https://coveralls.io/repos/github/IdanKoblik/BytePass/badge.svg)](https://coveralls.io/github/IdanKoblik/BytePass)
 
 ### Getting started
 Read the following guide to install bytepass on your machine:
