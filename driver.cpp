@@ -18,15 +18,13 @@ int runDriver(const std::string &addr, const std::string &filename) {
 
    std::ifstream file(filename, std::ios::binary | std::ios::ate);
    if (!file) {
-      perror("cannot open selected file"); 
-      exit(EXIT_FAILURE); 
+      std::cerr << "Cannot open selected file" << std::endl;
       return -1;
    }
 
    int sockfd;
    if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-      perror("socket creation failed"); 
-      exit(EXIT_FAILURE); 
+      std::cerr << "Socket creation failed" << std::endl;
       return -1;
    }
   
@@ -45,7 +43,7 @@ int runDriver(const std::string &addr, const std::string &filename) {
       protocol::FileChunk chunk;
       chunk.set_filename(filename);
       chunk.set_data(buffer.data(), toRead);
-      chunk.set_index(i);
+      chunk.set_index((i == chunksCount - 1) ? -1 : i);
 
       std::string serializedChunk;
       if (!chunk.SerializeToString(&serializedChunk)) {

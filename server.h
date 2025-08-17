@@ -1,6 +1,8 @@
 #ifndef SERVER_H
 #define SERVER_H
 
-int runServer(const unsigned int port);
+#include <string>
+
+int runServer(const unsigned int port, const std::string &outputDir);
 
 #endif

@@ -1,6 +1,8 @@
 #include <iostream>
-#include <ostream>
+#include <map>
+#include <vector>
 #include <stdexcept>
+#include <regex>
 #include "flags.h"
 #include "mode.h"
 #include "prompt.h"
@@ -8,69 +10,57 @@
 #include "server.h"
 
 std::string sanitizeFilename(const std::string &input);
-std::string trim(const std::string& str);
+std::string trim(const std::string &str);
 
 int main(int argc, char *argv[]) {
-   if (argc < 1) 
-      return -1;
+    std::map<std::string, std::vector<std::string>> modeOptions = {
+        {"sender", {"Addr", "Filename"}},
+        {"receiver", {"Port", "OutputDir"}}
+    };
 
-   if (argc == 1) {
-      unsigned int choice;
-      std::cout << "=== Select option ===" << std::endl;
-      std::cout << "1. Sender" << std::endl;
-      std::cout << "2. Receiver" << std::endl;
-      std::cout << ">>> ";
-      std::cin >> choice;
+    std::string selectedMode;
+    if (argc == 1) {
+        std::cout << "=== Select mode ===" << std::endl;
+        unsigned int idx = 1;
+        for (const auto &kv : modeOptions)
+            std::cout << idx++ << ". " << kv.first << std::endl;
 
-      switch (choice) {
-         case 1: {
-            std::vector<std::string> initial = {"Addr", "Filename"};
-            PromptOptions options(initial);
-            options.promptOptions(argc, argv);
-            runDriver(trim(options.getCtx("Addr")), trim(sanitizeFilename(options.getCtx("Filename"))));
-            break;
-         }
-         case 2: {
-            int port;
-            std::cout << "Port: ";
-            std::cin >> port;
+        std::cout << ">>> ";
+        unsigned int choice;
+        std::cin >> choice;
 
-            runServer(port);
-            break;
-         }
-         default:
-            std::cerr << "Invalid mode" << std::endl; 
+        if (choice < 1 || choice > modeOptions.size()) {
+            std::cerr << "Invalid choice" << std::endl;
             return -1;
-      }
+        }
 
-      return 0;
-   }
+        auto it = modeOptions.begin();
+        std::advance(it, choice - 1);
+        selectedMode = it->first;
+    } else {
+        FlagOptions options({"mode"});
+        options.promptOptions(argc, argv);
+        selectedMode = trim(options.getCtx("mode"));
+        if (selectedMode.empty() || modeOptions.find(selectedMode) == modeOptions.end()) {
+            std::cerr << "Invalid or missing mode" << std::endl;
+            return -1;
+        }
+    }
 
-   std::vector<std::string> initial = {"mode", "filename", "addr"};
-   FlagOptions options(initial);
-   options.promptOptions(argc, argv);
-   Mode mode;
-   try {
-      const std::string rawMode = options.getCtx("mode");
-      if (rawMode == "") {
-         std::cerr << "Missing mode" << std::endl;
-         return -1;
-      }
+    PromptOptions options(modeOptions[selectedMode]);
+    options.promptOptions(argc, argv);
 
-      mode = parseMode(rawMode);
-   } catch (const std::runtime_error &err) {
-      std::cerr << "Exception Caught: " << err.what() << std::endl;
-      return -1;
-   }
+    if (selectedMode == "sender") {
+        std::string addr = trim(options.getCtx("Addr"));
+        std::string filename = trim(sanitizeFilename(options.getCtx("Filename")));
+        runDriver(addr, filename);
+    } else if (selectedMode == "receiver") {
+        unsigned int port = static_cast<unsigned int>(std::stoi(options.getCtx("Port")));
+        std::string outputDir = options.getCtx("OutputDir");
+        runServer(port, outputDir);
+    }
 
-   if (mode == SENDER)
-      runDriver(options.getCtx("addr"), options.getCtx("filename"));
-   else if (options.getCtx("port") != "") {
-      unsigned int port = static_cast<unsigned int>(std::stoi(options.getCtx("port")));
-      runServer(port);
-   }
-
-   return 0;
+    return 0;
 }
 
 std::string trim(const std::string& str) {
@@ -80,18 +70,14 @@ std::string trim(const std::string& str) {
 }
 
 std::string sanitizeFilename(const std::string &input) {
-   std::string name = input;
-   size_t lastSlash = name.find_last_of("/\\");
-   if (lastSlash != std::string::npos) 
-      name = name.substr(lastSlash + 1);
-   
-   name = std::regex_replace(name, std::regex("\\.\\."), "");
-   name = std::regex_replace(name, std::regex("[^a-zA-Z0-9._-]"), "");
+    std::string name = input;
+    size_t lastSlash = name.find_last_of("/\\");
+    if (lastSlash != std::string::npos)
+        name = name.substr(lastSlash + 1);
 
-   if (name.empty())
-      name = "file";
+    name = std::regex_replace(name, std::regex("\\.\\."), "");
+    name = std::regex_replace(name, std::regex("[^a-zA-Z0-9._-]"), "");
 
-   return name;
+    return name.empty() ? "file" : name;
 }
-
 
