@@ -38,7 +38,7 @@ This will lead you to a dialog with the program to handle receiving and sending 
 
 ```bash
 # Receiver Flags
-./echo-ft --mode=receiver --port=8080
+./echo-ft --mode=receiver --port=8080 --outputDir=/path/to/output
 
 # Sender Flags
 ./echo-ft --mode=sender --addr=0.0.0.0:8080 --filename=test.txt
