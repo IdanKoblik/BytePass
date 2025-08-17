@@ -40,3 +40,5 @@ jobs:
   run_pipeline:
     needs: checkout
     uses: ./.github/workflows/callable.pipe.yml
+    with:
+      VERSION: ${{ github.event.inputs.name }}
