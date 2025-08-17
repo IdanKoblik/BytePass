@@ -37,6 +37,6 @@ jobs:
       - name: Output version
         run: echo "The version is ${{ steps.get_version.outputs.VERSION }}"
 
-  run_tests:
+  run_pipeline:
     needs: checkout
-    uses: ./.github/workflows/callable.test.yml
+    uses: ./.github/workflows/callable.pipe.yml
