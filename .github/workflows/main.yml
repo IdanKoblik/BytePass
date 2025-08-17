@@ -13,3 +13,31 @@ on:
         description: 'Version name'
         required: true
         type: string
+
+permissions:
+  pull-requests: write
+  contents: write
+  repository-projects: write
+  packages: write
+  pages: write
+  id-token: write
+
+jobs:
+  checkout:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get_version.outputs.VERSION }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Output version
+        run: echo "The version is ${{ steps.get_version.outputs.VERSION }}"
+
+  run_pipeline:
+    needs: checkout
+    uses: ./.github/workflows/callable.pipe.yml
+    with:
+      VERSION: ${{ github.event.inputs.name }}

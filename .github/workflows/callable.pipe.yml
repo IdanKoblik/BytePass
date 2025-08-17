@@ -1,0 +1,149 @@
+name: Lazy pipeline 
+
+on:
+  workflow_call:
+    inputs:
+      VERSION:
+        description: 'Version name'
+        required: true
+        type: string
+
+permissions:
+  pull-requests: write
+  contents: write
+  repository-projects: write
+  packages: write
+  pages: write
+  id-token: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+   
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          build-essential \
+          pkg-config \
+          cmake \
+          libssl-dev \
+          libgtest-dev \
+          lcov
+
+    # Cache Protocol Buffers installation
+    - name: Cache Protocol Buffers
+      id: cache-protobuf
+      uses: actions/cache@v4
+      with:
+        path: |
+          /usr/local/lib/libproto*
+          /usr/local/lib/pkgconfig/protobuf*
+          /usr/local/include/google
+          /usr/local/bin/protoc
+        key: protobuf-v31.1-${{ runner.os }}-${{ runner.arch }}
+        restore-keys: |
+          protobuf-v31.1-${{ runner.os }}-
+
+    # Cache Abseil
+    - name: Cache Abseil
+      id: cache-abseil
+      uses: actions/cache@v4
+      with:
+        path: |
+          /usr/local/lib/libabsl*
+          /usr/local/include/absl
+        key: abseil-${{ runner.os }}-${{ runner.arch }}
+        restore-keys: |
+          abseil-${{ runner.os }}-
+
+    # Cache GoogleTest
+    - name: Cache GoogleTest
+      id: cache-gtest
+      uses: actions/cache@v4
+      with:
+        path: |
+          /usr/lib/libgtest*.a
+          /usr/include/gtest
+          /usr/lib/pkgconfig/gtest.pc
+        key: gtest-${{ runner.os }}-${{ runner.arch }}
+        restore-keys: |
+          gtest-${{ runner.os }}-
+
+    - name: Install Abseil
+      if: steps.cache-abseil.outputs.cache-hit != 'true'
+      run: |
+        git clone https://github.com/abseil/abseil-cpp.git
+        cd abseil-cpp
+        mkdir build && cd build
+        cmake -DCMAKE_CXX_STANDARD=17 -DABSL_PROPAGATE_CXX_STD=ON -DBUILD_SHARED_LIBS=ON ..
+        make -j$(nproc)
+        sudo make install
+        sudo ldconfig
+
+    - name: Install Protocol Buffers
+      if: steps.cache-protobuf.outputs.cache-hit != 'true'
+      run: |
+        git clone https://github.com/protocolbuffers/protobuf.git
+        cd protobuf
+        git checkout v31.1 
+        mkdir build && cd build
+        cmake -Dprotobuf_BUILD_TESTS=OFF -DCMAKE_CXX_STANDARD=17 -DBUILD_SHARED_LIBS=ON ..
+        make -j$(nproc)
+        sudo make install
+        sudo ldconfig
+    
+    - name: Update ldconfig after cache restore
+      if: steps.cache-protobuf.outputs.cache-hit == 'true' || steps.cache-abseil.outputs.cache-hit == 'true'
+      run: sudo ldconfig
+    
+    - name: Build and install GoogleTest
+      if: steps.cache-gtest.outputs.cache-hit != 'true'
+      run: |
+        cd /usr/src/gtest
+        sudo cmake .
+        sudo make
+        sudo cp lib/*.a /usr/lib/
+        # Create pkg-config file for gtest
+        sudo mkdir -p /usr/lib/pkgconfig
+        cat << EOF | sudo tee /usr/lib/pkgconfig/gtest.pc
+        Name: gtest
+        Description: GoogleTest
+        Version: 1.0
+        Libs: -lgtest -lgtest_main -pthread
+        Cflags: -I/usr/include
+        EOF
+    
+    - name: Build and test with coverage
+      run: |
+        find . -name "*.gcda" -o -name "*.gcno" -delete 2>/dev/null || true
+
+        make
+        make coverage
+      
+    - name: Upload coverage to Coveralls
+      uses: coverallsapp/github-action@v2.3.6
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        path-to-lcov: coverage.info
+        flag-name: run-tests
+        parallel: false
+        
+    - name: Archive coverage report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: coverage-report
+        path: coverage-report/
+
+    - name: Publish to github releases
+      if: github.event_name == 'workflow_dispatch'
+      uses: IdanKoblik/Changelog@prod
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        version: ${{ inputs.VERSION }}
+        assets: '["./echo-ft"]'
