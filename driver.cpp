@@ -9,7 +9,7 @@
 #include <netinet/in.h> 
 #include "driver.h"
 #include "filechunk.pb.h"
-#include "net.h"
+#include "utils.h"
 
 #define BUFFER_SIZE 1024
 
@@ -21,6 +21,9 @@ int runDriver(const std::string &addr, const std::string &filename) {
       std::cerr << "Cannot open selected file" << std::endl;
       return -1;
    }
+
+   const std::string checksum = calcChecksum(filename);
+   std::cout << "Sending file with checksum: " << checksum << std::endl; 
 
    int sockfd;
    if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
@@ -44,6 +47,7 @@ int runDriver(const std::string &addr, const std::string &filename) {
       chunk.set_filename(filename);
       chunk.set_data(buffer.data(), toRead);
       chunk.set_index((i == chunksCount - 1) ? -1 : i);
+      chunk.set_checksum(checksum);
 
       std::string serializedChunk;
       if (!chunk.SerializeToString(&serializedChunk)) {
