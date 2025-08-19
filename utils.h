@@ -1,6 +1,7 @@
-#ifndef NET_H
-#define NET_H
+#ifndef UTILS_H
+#define UTILS_H
 
+#include <iostream>
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <string>
@@ -11,5 +12,11 @@
 #define MAX_PORT 65535
 
 sockaddr_in parseAddress(const std::string &addrStr);
+
+std::string sanitizeFilename(const std::string &input);
+
+std::string trim(const std::string& str);
+
+std::string calcChecksum(const std::string& path);
 
 #endif

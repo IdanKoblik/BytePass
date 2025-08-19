@@ -6,4 +6,5 @@ message FileChunk {
   required string filename = 1;
   required bytes data = 2;
   required int32 index = 3;
+  required string checksum = 4;
 }

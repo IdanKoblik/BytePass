@@ -25,10 +25,10 @@ $(PROTO_SRCS) $(PROTO_HDRS): $(PROTO_FILES)
 	$(PROTOC) $(PROTOC_FLAGS) --cpp_out=. $(PROTO_FILES)
 
 $(TARGET): $(SRCS) $(PROTO_SRCS)
-	$(CXX) $(CXXFLAGS) $(SRCS) `$(PKG_CONFIG) --cflags --libs protobuf` -o $(TARGET)
+	$(CXX) $(CXXFLAGS) $(SRCS) `$(PKG_CONFIG) --cflags --libs protobuf` -lcrypto -o $(TARGET)
 
 $(TEST_TARGET): clean-coverage $(TEST_OBJS) $(OBJS_NOT_MAIN)
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(TEST_OBJS) $(OBJS_NOT_MAIN) `pkg-config --cflags --libs protobuf gtest gtest_main` -o $(TEST_TARGET)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(TEST_OBJS) $(OBJS_NOT_MAIN) `pkg-config --cflags --libs protobuf gtest gtest_main` -lcrypto -o $(TEST_TARGET)
 
 test/%.o: test/%.cpp
 	$(CXX) $(CXXFLAGS) -I. `pkg-config --cflags protobuf gtest` -c $< -o $@

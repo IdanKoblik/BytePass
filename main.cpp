@@ -1,16 +1,12 @@
 #include <iostream>
 #include <map>
 #include <vector>
-#include <stdexcept>
-#include <regex>
 #include "flags.h"
-#include "mode.h"
 #include "prompt.h"
 #include "driver.h"
 #include "server.h"
-
-std::string sanitizeFilename(const std::string &input);
-std::string trim(const std::string &str);
+#include "utils.h"
+#include "mode.h"
 
 int main(int argc, char *argv[]) {
     std::map<std::string, std::vector<std::string>> modeOptions = {
@@ -50,11 +46,11 @@ int main(int argc, char *argv[]) {
     PromptOptions options(modeOptions[selectedMode]);
     options.promptOptions(argc, argv);
 
-    if (selectedMode == "sender") {
+    if (parseMode(selectedMode) == SENDER) {
         std::string addr = trim(options.getCtx("Addr"));
         std::string filename = trim(sanitizeFilename(options.getCtx("Filename")));
         runDriver(addr, filename);
-    } else if (selectedMode == "receiver") {
+    } else if (parseMode(selectedMode) == RECEIVER) {
         unsigned int port = static_cast<unsigned int>(std::stoi(options.getCtx("Port")));
         std::string outputDir = options.getCtx("OutputDir");
         runServer(port, outputDir);
@@ -63,21 +59,4 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
-std::string trim(const std::string& str) {
-    size_t start = str.find_first_not_of(" \t\n\r");
-    size_t end = str.find_last_not_of(" \t\n\r");
-    return (start == std::string::npos) ? "" : str.substr(start, end - start + 1);
-}
-
-std::string sanitizeFilename(const std::string &input) {
-    std::string name = input;
-    size_t lastSlash = name.find_last_of("/\\");
-    if (lastSlash != std::string::npos)
-        name = name.substr(lastSlash + 1);
-
-    name = std::regex_replace(name, std::regex("\\.\\."), "");
-    name = std::regex_replace(name, std::regex("[^a-zA-Z0-9._-]"), "");
-
-    return name.empty() ? "file" : name;
-}
 

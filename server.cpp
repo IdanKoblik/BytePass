@@ -10,7 +10,7 @@
 #include <netinet/in.h> 
 #include "server.h"
 #include "filechunk.pb.h"
-#include "net.h"
+#include "utils.h"
 
 #define BUFFER 4096
 
@@ -115,6 +115,16 @@ int runServer(const unsigned int port, const std::string &outputDir) {
           
          ofs.close();
          std::cout << "File reconstructed: " << filename << std::endl;
+
+         std::cout << "Checking file checksum..." << std::endl;
+         const std::string checksum = calcChecksum(filename);
+         std::cout << "Received file - " << checksum << std::endl;
+
+         if (checksum == chunk.checksum())
+            std::cout << "Checksum is valid!" << std::endl;
+         else
+            std::cerr << "Checksum is invalid!" << std::endl;
+
          break;
       }
      
